@@ -49,12 +49,6 @@ export default function TripDetail() {
     },
   });
 
-  useEffect(() => {
-    if (id && session) {
-      fetchTripData();
-    }
-  }, [id, session]);
-
   const fetchTripData = async () => {
     try {
       const [tripResponse, expensesResponse] = await Promise.all([
@@ -77,6 +71,12 @@ export default function TripDetail() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (id && session) {
+      fetchTripData();
+    }
+  }, [id, session]);
 
   const calculateSettlements = () => {
     if (!trip || !expenses) return [];
