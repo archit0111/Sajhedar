@@ -32,7 +32,7 @@ export default clientPromise;
 export async function connectDB() {
   try {
     if (mongoose.connection.readyState >= 1) {
-      console.log('MongoDB already connected');
+      //console.log('MongoDB already connected');
       return;
     }
 
