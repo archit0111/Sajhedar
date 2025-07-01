@@ -39,21 +39,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!description || !amount || !payer || !date) {
           return res.status(400).json({ error: 'Missing required fields' });
         }
-        // Find payer by name (or email if you prefer)
-        const payerUser = await User.findOne({ name: payer });
-        if (!payerUser) {
-          return res.status(404).json({ error: 'Payer not found' });
-        }
         // For now, split equally among all trip members
-        // You can enhance this logic for custom splits
-        const tripMembers = await User.find({}); // Optionally filter by trip
         const splitAmount = amount / (splits?.length || 1);
         const splitArray = (splits && splits.length > 0)
           ? splits.map((s: any) => ({ memberId: s.memberId, amount: s.amount }))
-          : [{ memberId: payerUser._id, amount: splitAmount }];
+          : [{ memberId: payer, amount: splitAmount }];
         const expense = new Expense({
           tripId: id,
-          payer: payerUser._id,
+          payer,
           amount,
           description,
           date,

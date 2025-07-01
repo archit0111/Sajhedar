@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types, models } from 'mongoose';
 
 export interface IExpense extends Document {
   tripId: Types.ObjectId;
-  payer: Types.ObjectId;
+  payer: string;
   amount: number;
   description: string;
   date: Date;
@@ -15,7 +15,7 @@ export interface IExpense extends Document {
 
 const ExpenseSchema = new Schema<IExpense>({
   tripId: { type: Schema.Types.ObjectId, ref: 'Trip', required: true },
-  payer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  payer: { type: String, required: true },
   amount: { type: Number, required: true },
   description: { type: String, required: true },
   date: { type: Date, required: true },
