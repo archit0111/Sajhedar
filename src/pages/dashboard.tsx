@@ -42,7 +42,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreateTrip = async (tripData: any) => {
+  const handleCreateTrip = async (tripData: Record<string, unknown>) => {
     try {
       const response = await fetch('/api/trips', {
         method: 'POST',

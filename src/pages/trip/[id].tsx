@@ -115,13 +115,13 @@ export default function TripDetail() {
     reset();
   };
 
-  const onExpenseSubmit = async (data: any) => {
+  const onExpenseSubmit = async (data: Record<string, unknown>) => {
     try {
       if (!trip) return;
       
       // Calculate equal split among all members
-      const splitAmount = parseFloat(data.amount) / trip.members.length;
-      const splits = trip.members.map((member: any) => ({
+      const splitAmount = parseFloat(data.amount as string) / trip.members.length;
+      const splits = trip.members.map((member: { name: string }) => ({
         memberId: member.name,
         amount: splitAmount,
       }));
@@ -131,14 +131,14 @@ export default function TripDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          amount: parseFloat(data.amount),
+          amount: parseFloat(data.amount as string),
           tripId: id,
           splits,
         }),
       });
       closeExpenseModal();
       fetchTripData();
-    } catch (err) {
+    } catch {
       alert('Failed to add expense');
     }
   };
@@ -272,7 +272,7 @@ export default function TripDetail() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'expenses' | 'settlement')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'

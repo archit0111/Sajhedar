@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // For now, split equally among all trip members
         const splitAmount = amount / (splits?.length || 1);
         const splitArray = (splits && splits.length > 0)
-          ? splits.map((s: any) => ({ memberId: s.memberId, amount: s.amount }))
+          ? splits.map((s: { memberId: string; amount: number }) => ({ memberId: s.memberId, amount: s.amount }))
           : [{ memberId: payer, amount: splitAmount }];
         const expense = new Expense({
           tripId: id,

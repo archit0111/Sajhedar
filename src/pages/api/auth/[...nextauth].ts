@@ -2,7 +2,6 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import clientPromise from '@/lib/mongodb';
-import type { NextApiRequest, NextApiResponse } from 'next';
 
 //console.log("DEBUG ENV:", process.env);
 // Debug: Check environment variables
