@@ -117,6 +117,15 @@ export default function TripDetail() {
 
   const onExpenseSubmit = async (data: any) => {
     try {
+      if (!trip) return;
+      
+      // Calculate equal split among all members
+      const splitAmount = parseFloat(data.amount) / trip.members.length;
+      const splits = trip.members.map((member: any) => ({
+        memberId: member.name,
+        amount: splitAmount,
+      }));
+
       await fetch(`/api/trips/${id}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,6 +133,7 @@ export default function TripDetail() {
           ...data,
           amount: parseFloat(data.amount),
           tripId: id,
+          splits,
         }),
       });
       closeExpenseModal();

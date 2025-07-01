@@ -8,7 +8,7 @@ export interface IExpense extends Document {
   date: Date;
   splitType: 'equal' | 'custom' | 'percentage';
   splits: {
-    memberId: Types.ObjectId;
+    memberId: string;
     amount: number;
   }[];
 }
@@ -22,7 +22,7 @@ const ExpenseSchema = new Schema<IExpense>({
   splitType: { type: String, enum: ['equal', 'custom', 'percentage'], required: true },
   splits: [
     {
-      memberId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      memberId: { type: String, required: true },
       amount: { type: Number, required: true },
     },
   ],
