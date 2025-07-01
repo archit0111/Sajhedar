@@ -1,0 +1,269 @@
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { ArrowLeft, Plus, DollarSign, Users, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface Trip {
+  _id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  currency: string;
+  members: { name: string; email?: string }[];
+  createdBy: string;
+}
+
+interface Expense {
+  _id: string;
+  tripId: string;
+  payer: string;
+  amount: number;
+  description: string;
+  date: string;
+  splitType: 'equal' | 'custom' | 'percentage';
+  splits: { memberId: string; amount: number }[];
+}
+
+export default function TripDetail() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const { id } = router.query;
+  
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'settlement'>('overview');
+
+  useEffect(() => {
+    if (id && session) {
+      fetchTripData();
+    }
+  }, [id, session]);
+
+  const fetchTripData = async () => {
+    try {
+      const [tripResponse, expensesResponse] = await Promise.all([
+        fetch(`/api/trips/${id}`),
+        fetch(`/api/trips/${id}/expenses`)
+      ]);
+
+      if (tripResponse.ok) {
+        const tripData = await tripResponse.json();
+        setTrip(tripData);
+      }
+
+      if (expensesResponse.ok) {
+        const expensesData = await expensesResponse.json();
+        setExpenses(expensesData);
+      }
+    } catch (error) {
+      console.error('Error fetching trip data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateSettlements = () => {
+    if (!trip || !expenses) return [];
+
+    const balances: { [key: string]: number } = {};
+    
+    // Initialize balances
+    trip.members.forEach(member => {
+      balances[member.name] = 0;
+    });
+
+    // Calculate balances
+    expenses.forEach(expense => {
+      const payer = trip.members.find(m => m.name === expense.payer);
+      if (payer) {
+        balances[payer.name] += expense.amount;
+      }
+
+      expense.splits.forEach(split => {
+        const member = trip.members.find(m => m.name === split.memberId);
+        if (member) {
+          balances[member.name] -= split.amount;
+        }
+      });
+    });
+
+    return Object.entries(balances).map(([name, balance]) => ({
+      name,
+      balance,
+    }));
+  };
+
+  if (!session) {
+    router.push('/');
+    return null;
+  }
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-gray-50 p-8">Loading...</div>;
+  }
+
+  if (!trip) {
+    return <div className="min-h-screen bg-gray-50 p-8">Trip not found</div>;
+  }
+
+  const settlements = calculateSettlements();
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Head>
+        <title>{trip.name} | Trip Expense Manager</title>
+      </Head>
+
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="mr-4 p-2 rounded-md hover:bg-gray-100"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h1 className="text-xl font-semibold">{trip.name}</h1>
+            </div>
+            <button
+              onClick={() => {/* TODO: Add expense modal */}}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Expense
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Trip Overview */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm text-gray-500">Duration</p>
+                <p className="font-medium">
+                  {format(new Date(trip.startDate), 'MMM dd')} - {format(new Date(trip.endDate), 'MMM dd, yyyy')}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm text-gray-500">Members</p>
+                <p className="font-medium">{trip.members.length} people</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm text-gray-500">Total Expenses</p>
+                <p className="font-medium">{trip.currency} {totalExpenses.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'expenses', label: 'Expenses' },
+                { id: 'settlement', label: 'Settlement' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="p-6">
+            {activeTab === 'overview' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Trip Members</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {trip.members.map((member, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <p className="font-medium">{member.name}</p>
+                      {member.email && <p className="text-sm text-gray-500">{member.email}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'expenses' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Expenses</h3>
+                {expenses.length === 0 ? (
+                  <p className="text-gray-500">No expenses yet. Add your first expense!</p>
+                ) : (
+                  <div className="space-y-4">
+                    {expenses.map((expense) => (
+                      <div key={expense._id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium">{expense.description}</p>
+                            <p className="text-sm text-gray-500">
+                              Paid by {expense.payer} on {format(new Date(expense.date), 'MMM dd, yyyy')}
+                            </p>
+                          </div>
+                          <p className="font-semibold">{trip.currency} {expense.amount.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'settlement' && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Settlement Summary</h3>
+                <div className="space-y-4">
+                  {settlements.map((settlement) => (
+                    <div key={settlement.name} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{settlement.name}</span>
+                        <span className={`font-semibold ${settlement.balance > 0 ? 'text-green-600' : settlement.balance < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                          {settlement.balance > 0 ? '+' : ''}{trip.currency} {settlement.balance.toFixed(2)}
+                        </span>
+                      </div>
+                      {settlement.balance > 0 && (
+                        <p className="text-sm text-green-600 mt-1">Will receive money</p>
+                      )}
+                      {settlement.balance < 0 && (
+                        <p className="text-sm text-red-600 mt-1">Owes money</p>
+                      )}
+                      {settlement.balance === 0 && (
+                        <p className="text-sm text-gray-500 mt-1">All settled</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
