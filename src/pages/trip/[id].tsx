@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { ArrowLeft, Plus, DollarSign, Users, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
+import { Dialog } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 
 interface Trip {
   _id: string;
@@ -35,6 +37,17 @@ export default function TripDetail() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'settlement'>('overview');
+  const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      description: '',
+      amount: '',
+      payer: '',
+      date: '',
+      splitType: 'equal',
+      splits: [],
+    },
+  });
 
   useEffect(() => {
     if (id && session) {
@@ -96,6 +109,30 @@ export default function TripDetail() {
     }));
   };
 
+  const openExpenseModal = () => setExpenseModalOpen(true);
+  const closeExpenseModal = () => {
+    setExpenseModalOpen(false);
+    reset();
+  };
+
+  const onExpenseSubmit = async (data: any) => {
+    try {
+      await fetch(`/api/trips/${id}/expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          amount: parseFloat(data.amount),
+          tripId: id,
+        }),
+      });
+      closeExpenseModal();
+      fetchTripData();
+    } catch (err) {
+      alert('Failed to add expense');
+    }
+  };
+
   if (!session) {
     router.push('/');
     return null;
@@ -131,7 +168,7 @@ export default function TripDetail() {
               <h1 className="text-xl font-semibold">{trip.name}</h1>
             </div>
             <button
-              onClick={() => {/* TODO: Add expense modal */}}
+              onClick={openExpenseModal}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
@@ -140,6 +177,47 @@ export default function TripDetail() {
           </div>
         </div>
       </div>
+
+      {/* Expense Modal */}
+      <Dialog open={isExpenseModalOpen} onClose={closeExpenseModal} className="fixed z-50 inset-0 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6 z-10">
+            <Dialog.Title className="text-lg font-bold mb-4">Add Expense</Dialog.Title>
+            <form onSubmit={handleSubmit(onExpenseSubmit)} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input {...register('description', { required: true })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                {errors.description && <p className="text-red-500 text-xs mt-1">Description is required</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <input type="number" step="0.01" {...register('amount', { required: true })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                {errors.amount && <p className="text-red-500 text-xs mt-1">Amount is required</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payer</label>
+                <select {...register('payer', { required: true })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select payer</option>
+                  {trip.members.map((member, idx) => (
+                    <option key={idx} value={member.name}>{member.name}</option>
+                  ))}
+                </select>
+                {errors.payer && <p className="text-red-500 text-xs mt-1">Payer is required</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date" {...register('date', { required: true })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                {errors.date && <p className="text-red-500 text-xs mt-1">Date is required</p>}
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={closeExpenseModal} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Dialog>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Trip Overview */}

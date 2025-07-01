@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import mongoose from 'mongoose';
 import Trip from '@/models/Trip';
 import { connectDB } from '@/lib/mongodb';
+import User from '@/models/User';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -23,13 +24,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        // Find the user by email to get their ObjectId
+        const user = await User.findOne({ email: session.user?.email });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+
         const trip = new Trip({
           name,
           startDate,
           endDate,
           currency,
           members,
-          createdBy: session.user?.email || 'unknown',
+          createdBy: user._id,
         });
 
         await trip.save();
@@ -40,7 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     } else if (req.method === 'GET') {
       try {
-        const trips = await Trip.find({ createdBy: session.user?.email })
+        // Find the user by email to get their ObjectId
+        const user = await User.findOne({ email: session.user?.email });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        const trips = await Trip.find({ createdBy: user._id })
           .sort({ createdAt: -1 })
           .lean();
         

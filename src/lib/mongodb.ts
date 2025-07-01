@@ -1,11 +1,11 @@
 import { MongoClient } from 'mongodb';
 import mongoose from 'mongoose';
 
-console.log("DEBUG ENV:", process.env);
+//console.log("DEBUG ENV:", process.env);
 // Debug: Log environment variables
-console.log('Environment check:');
-console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
-console.log('NODE_ENV:', process.env.NODE_ENV);
+//console.log('Environment check:');
+//console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+//console.log('NODE_ENV:', process.env.NODE_ENV);
 
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/trips';
 

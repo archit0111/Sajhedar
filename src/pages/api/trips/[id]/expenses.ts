@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import mongoose from 'mongoose';
 import Expense from '@/models/Expense';
 import { connectDB } from '@/lib/mongodb';
+import User from '@/models/User';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -32,8 +33,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error fetching expenses:', error);
         res.status(500).json({ error: 'Failed to fetch expenses' });
       }
+    } else if (req.method === 'POST') {
+      try {
+        const { description, amount, payer, date, splitType, splits } = req.body;
+        if (!description || !amount || !payer || !date) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+        // Find payer by name (or email if you prefer)
+        const payerUser = await User.findOne({ name: payer });
+        if (!payerUser) {
+          return res.status(404).json({ error: 'Payer not found' });
+        }
+        // For now, split equally among all trip members
+        // You can enhance this logic for custom splits
+        const tripMembers = await User.find({}); // Optionally filter by trip
+        const splitAmount = amount / (splits?.length || 1);
+        const splitArray = (splits && splits.length > 0)
+          ? splits.map((s: any) => ({ memberId: s.memberId, amount: s.amount }))
+          : [{ memberId: payerUser._id, amount: splitAmount }];
+        const expense = new Expense({
+          tripId: id,
+          payer: payerUser._id,
+          amount,
+          description,
+          date,
+          splitType: splitType || 'equal',
+          splits: splitArray,
+        });
+        await expense.save();
+        res.status(201).json(expense);
+      } catch (error) {
+        console.error('Error creating expense:', error);
+        res.status(500).json({ error: 'Failed to create expense' });
+      }
     } else {
-      res.setHeader('Allow', ['GET']);
+      res.setHeader('Allow', ['GET', 'POST']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error) {

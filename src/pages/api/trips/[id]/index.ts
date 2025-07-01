@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import mongoose from 'mongoose';
 import Trip from '@/models/Trip';
 import { connectDB } from '@/lib/mongodb';
+import User from '@/models/User';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -23,9 +24,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
       try {
+        // Find the user by email to get their ObjectId
+        const user = await User.findOne({ email: session.user?.email });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
         const trip = await Trip.findOne({ 
           _id: id,
-          createdBy: session.user?.email 
+          createdBy: user._id
         }).lean();
 
         if (!trip) {
