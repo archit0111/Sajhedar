@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-import mongoose from 'mongoose';
 import Trip from '@/models/Trip';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
