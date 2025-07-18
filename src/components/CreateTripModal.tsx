@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, Trash2 } from 'lucide-react';
+import React from 'react';
 
 const createTripSchema = z.object({
   name: z.string().min(1, 'Trip name is required'),
@@ -21,9 +22,11 @@ interface CreateTripModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateTripForm) => void;
+  initialData?: Partial<CreateTripForm>;
+  isEditMode?: boolean;
 }
 
-export default function CreateTripModal({ isOpen, onClose, onSubmit }: CreateTripModalProps) {
+export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData, isEditMode }: CreateTripModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
@@ -35,11 +38,18 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit }: CreateTri
     reset,
   } = useForm<CreateTripForm>({
     resolver: zodResolver(createTripSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       members: [{ name: '', email: '' }],
       currency: 'USD',
     },
   });
+
+  // Reset form to initialData when modal opens for editing
+  React.useEffect(() => {
+    if (isOpen && initialData) {
+      reset(initialData);
+    }
+  }, [isOpen, initialData, reset]);
 
   const members = watch('members');
 
@@ -72,7 +82,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit }: CreateTri
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Create New Trip</h2>
+          <h2 className="text-2xl font-bold">{isEditMode ? 'Edit Trip' : 'Create New Trip'}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X className="w-6 h-6" />
           </button>
@@ -208,7 +218,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit }: CreateTri
               disabled={isSubmitting}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating...' : 'Create Trip'}
+              {isSubmitting ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Trip')}
             </button>
           </div>
         </form>

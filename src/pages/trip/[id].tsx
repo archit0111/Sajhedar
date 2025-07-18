@@ -2,10 +2,12 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { ArrowLeft, Plus, DollarSign, Users, Calendar } from 'lucide-react';
+import { ArrowLeft, Plus, DollarSign, Users, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
+import CreateTripModal from '@/components/CreateTripModal';
+import React from 'react';
 
 interface Trip {
   _id: string;
@@ -38,6 +40,8 @@ export default function TripDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'settlement'>('overview');
   const [isExpenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [isExpenseSubmitting, setIsExpenseSubmitting] = useState(false);
+  const [lastExpenseSubmitTime, setLastExpenseSubmitTime] = useState<number | null>(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       description: '',
@@ -48,6 +52,11 @@ export default function TripDetail() {
       splits: [],
     },
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [isExpenseUpdating, setIsExpenseUpdating] = useState(false);
 
   const fetchTripData = async () => {
     try {
@@ -117,6 +126,13 @@ export default function TripDetail() {
   };
 
   const onExpenseSubmit = async (data: Record<string, unknown>) => {
+    const now = Date.now();
+    if (lastExpenseSubmitTime && now - lastExpenseSubmitTime < 10000) {
+      alert('Please wait 10 seconds before adding another expense.');
+      return;
+    }
+    setIsExpenseSubmitting(true);
+    setLastExpenseSubmitTime(now);
     try {
       if (!trip) return;
       
@@ -141,6 +157,73 @@ export default function TripDetail() {
       fetchTripData();
     } catch {
       alert('Failed to add expense');
+    } finally {
+      setIsExpenseSubmitting(false);
+    }
+  };
+
+  const openEditExpenseModal = (expense: Expense) => {
+    setEditingExpense(expense);
+    setIsEditExpenseModalOpen(true);
+  };
+  const closeEditExpenseModal = () => {
+    setEditingExpense(null);
+    setIsEditExpenseModalOpen(false);
+  };
+  const handleEditExpense = async (data: Record<string, unknown>) => {
+    if (!editingExpense) return;
+    setIsExpenseUpdating(true);
+    try {
+      const response = await fetch(`/api/trips/${id}/expenses/${editingExpense._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        closeEditExpenseModal();
+        fetchTripData();
+      } else {
+        alert('Failed to update expense');
+      }
+    } catch {
+      alert('Failed to update expense');
+    } finally {
+      setIsExpenseUpdating(false);
+    }
+  };
+
+  const handleEditTrip = async (data: Record<string, unknown>) => {
+    try {
+      const response = await fetch(`/api/trips/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        setIsEditModalOpen(false);
+        fetchTripData();
+      } else {
+        alert('Failed to update trip');
+      }
+    } catch {
+      alert('Failed to update trip');
+    }
+  };
+
+  const handleDeleteTrip = async () => {
+    if (!confirm('Are you sure you want to delete this trip? This action cannot be undone.')) return;
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/trips/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        router.push('/dashboard');
+      } else {
+        alert('Failed to delete trip');
+      }
+    } catch {
+      alert('Failed to delete trip');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -178,11 +261,27 @@ export default function TripDetail() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <h1 className="text-xl font-semibold">{trip.name}</h1>
+              <h1 className="text-xl font-semibold mr-4 flex items-center gap-2">{trip.name}
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-1 rounded hover:bg-yellow-100 ml-2"
+                  title="Edit Trip"
+                >
+                  <Pencil className="w-5 h-5 text-yellow-500" />
+                </button>
+                <button
+                  onClick={handleDeleteTrip}
+                  className="p-1 rounded hover:bg-red-100 ml-2"
+                  title="Delete Trip"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </button>
+              </h1>
             </div>
             <button
               onClick={openExpenseModal}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-2 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
               Add Expense
@@ -225,12 +324,77 @@ export default function TripDetail() {
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={closeExpenseModal} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Add</button>
+                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" disabled={isExpenseSubmitting}>
+                  {isExpenseSubmitting ? 'Adding...' : 'Add'}
+                </button>
               </div>
             </form>
           </div>
         </div>
       </Dialog>
+
+      {/* Edit Trip Modal */}
+      <CreateTripModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditTrip}
+        initialData={trip}
+        isEditMode={true}
+      />
+
+      {/* Edit Expense Modal */}
+      {isEditExpenseModalOpen && editingExpense && (
+        <Dialog open={isEditExpenseModalOpen} onClose={closeEditExpenseModal} className="fixed z-50 inset-0 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-black opacity-30" />
+            <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6 z-10">
+              <Dialog.Title className="text-lg font-bold mb-4">Edit Expense</Dialog.Title>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  const data = Object.fromEntries(formData.entries());
+                  await handleEditExpense({
+                    ...editingExpense,
+                    ...data,
+                    amount: parseFloat(data.amount as string),
+                  });
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <input name="description" defaultValue={editingExpense.description} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                  <input name="amount" type="number" step="0.01" defaultValue={editingExpense.amount} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payer</label>
+                  <select name="payer" defaultValue={editingExpense.payer} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <option value="">Select payer</option>
+                    {trip.members.map((member, idx) => (
+                      <option key={idx} value={member.name}>{member.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input name="date" type="date" defaultValue={editingExpense.date?.slice(0, 10)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={closeEditExpenseModal} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
+                  <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" disabled={isExpenseUpdating}>
+                    {isExpenseUpdating ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </Dialog>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Trip Overview */}
@@ -422,7 +586,15 @@ export default function TripDetail() {
                       <div key={expense._id} className="bg-gray-50 rounded-lg p-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium">{expense.description}</p>
+                            <p className="font-medium flex items-center gap-2">{expense.description}
+                              <button
+                                onClick={() => openEditExpenseModal(expense)}
+                                className="p-1 rounded hover:bg-yellow-100 ml-2"
+                                title="Edit Expense"
+                              >
+                                <Pencil className="w-4 h-4 text-yellow-500" />
+                              </button>
+                            </p>
                             <p className="text-sm text-gray-500">
                               Paid by {expense.payer} on {format(new Date(expense.date), 'MMM dd, yyyy')}
                             </p>

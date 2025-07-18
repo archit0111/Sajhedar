@@ -42,8 +42,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error fetching trip:', error);
         res.status(500).json({ error: 'Failed to fetch trip' });
       }
+    } else if (req.method === 'PUT') {
+      try {
+        const user = await User.findOne({ email: session.user?.email });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        const { name, startDate, endDate, currency, members } = req.body;
+        const updateFields: Record<string, unknown> = {};
+        if (name) updateFields.name = name;
+        if (startDate) updateFields.startDate = startDate;
+        if (endDate) updateFields.endDate = endDate;
+        if (currency) updateFields.currency = currency;
+        if (members) updateFields.members = members;
+        const updatedTrip = await Trip.findOneAndUpdate(
+          { _id: id, createdBy: user._id },
+          { $set: updateFields },
+          { new: true }
+        );
+        if (!updatedTrip) {
+          return res.status(404).json({ error: 'Trip not found or not authorized' });
+        }
+        res.status(200).json(updatedTrip);
+      } catch (error) {
+        console.error('Error updating trip:', error);
+        res.status(500).json({ error: 'Failed to update trip' });
+      }
+    } else if (req.method === 'DELETE') {
+      try {
+        const user = await User.findOne({ email: session.user?.email });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        const deletedTrip = await Trip.findOneAndDelete({ _id: id, createdBy: user._id });
+        if (!deletedTrip) {
+          return res.status(404).json({ error: 'Trip not found or not authorized' });
+        }
+        res.status(200).json({ message: 'Trip deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting trip:', error);
+        res.status(500).json({ error: 'Failed to delete trip' });
+      }
     } else {
-      res.setHeader('Allow', ['GET']);
+      res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error) {
