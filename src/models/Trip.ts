@@ -17,9 +17,9 @@ export interface ITrip extends Document {
 const TripSchema = new Schema<ITrip>({
   name: { type: String, required: true },
   startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
+  endDate: { type: Date },
   currency: { type: String, required: true },
-  members: [
+  members: [ 
     {
       name: { type: String, required: true },
       email: { type: String },
@@ -29,4 +29,4 @@ const TripSchema = new Schema<ITrip>({
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
-export default models.Trip || mongoose.model<ITrip>('Trip', TripSchema); 
+export default models.Trip || mongoose.model<ITrip>('Trip', TripSchema);

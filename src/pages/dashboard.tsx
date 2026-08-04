@@ -1,122 +1,123 @@
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Plus,
+  MapPin
+} from 'lucide-react';
+import Nav from '@/components/Nav';
 import TripCard from '@/components/TripCard';
 import CreateTripModal from '@/components/CreateTripModal';
-
-interface Trip {
-  _id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  currency: string;
-  members: { name: string }[];
-}
+import { useSession } from 'next-auth/react';
+import Footer from '@/components/Footer';
+import { useRouter } from 'next/router';
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
+
   const router = useRouter();
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadingTrips, setLoadingTrips] = useState(false);
+  const [error, setError] = useState('');
+  const [trips, setTrips] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [creator,setCreator]=useState('');
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (session) {
-      fetchTrips();
+    if (status === 'unauthenticated') {
+      router.push('/login');
     }
-  }, [session]);
+  }, [router, status]);
 
-  const fetchTrips = async () => {
-    try {
-      const response = await fetch('/api/trips');
-      if (response.ok) {
-        const data = await response.json();
+  useEffect(() => {
+    const fetchUserTrips = async () => {
+      if (!session) return;
+
+      try {
+        setLoadingTrips(true);
+        const res = await fetch('/api/trips');
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch trips');
+        }
+        const data = await res.json();
         setTrips(data);
+        
+      } catch (e: any) {
+        setError(e.message || "something went wrong!");
+      } finally {
+        setLoadingTrips(false);
       }
-    } catch (error) {
-      console.error('Error fetching trips:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+    fetchUserTrips();
+  }, [session, status]);
 
-  const handleCreateTrip = async (tripData: Record<string, unknown>) => {
-    try {
-      const response = await fetch('/api/trips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(tripData),
-      });
+  if (status === 'loading') {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <p className="text-xl font-bold text-teal-800">Loading your dashboard...</p>
+      </div>
+    )
+  }
 
-      if (response.ok) {
-        const newTrip = await response.json();
-        setTrips([newTrip, ...trips]);
-      }
-    } catch (error) {
-      console.error('Error creating trip:', error);
-      throw error;
-    }
-  };
-
-  const handleTripClick = (tripId: string) => {
-    router.push(`/trip/${tripId}`);
-  };
-
-  if (status === 'loading') return <div>Loading...</div>;
   if (!session) {
-    router.push('/');
     return null;
   }
 
+  const onClose = () => {
+    setIsOpen(false);
+  }
+
+  const onSubmit = async (data: any) => {
+    try {
+      const res = await fetch('/api/trips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Failed to create trip');
+      console.log("Trip created successfully!");
+      const newTrip = resData.trip || resData;
+      setTrips((prevTrips): any => [newTrip, ...prevTrips]);
+    } catch (e) {
+      console.error('Error in creating trip:', e);
+    }
+  }
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <Head>
-        <title>Dashboard | Trip Expense Manager</title>
-      </Head>
-      
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Welcome, {session.user?.name}</h1>
-        <button onClick={() => signOut()} className="px-4 py-2 bg-red-500 text-white rounded">Sign Out</button>
+    <div className='bg-slate-50'>
+      <div className='m-5 bg-slate-50'>
+        <Nav />
       </div>
+      <div className="m-5 mt-25 grow">
+        <div className='justify-center flex'>
+          <p className='font-bold text-center text-teal-800 text-3xl md:text-4xl'>
+            Welcome, {session.user?.name}! Start your Trip today with us
+          </p>
+        </div>
+        <div className='flex justify-center mt-15'>
+          <button className='p-4 font-bold text-slate-50 rounded-2xl cursor-pointer flex bg-teal-400 hover:bg-green-500'
+            onClick={() => setIsOpen(prev => !prev)}>
+            <Plus className='text-white pr-1' /> Start New Trip
+          </button>
+        </div>
+        <div className="mt-20">
+          <h3 className='pl-2 font-bold text-2xl text-teal-800'>Your Trips</h3>
+        </div>
+        {trips.length === 0 ? (
+          <div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
+            No trips present...
+          </div>
+        ) : (
+          <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
+            {trips.map((trip: any) => (
+              <TripCard trip={trip}/>
+            ))}
+          </div>
+        )}
 
-      <div className="mb-8">
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Create New Trip
-        </button>
       </div>
-
-      {isLoading ? (
-        <div className="text-center py-8">Loading trips...</div>
-      ) : trips.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <p className="text-lg mb-4">No trips yet</p>
-          <p>Create your first trip to get started!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trips.map((trip) => (
-            <TripCard
-              key={trip._id}
-              trip={trip}
-              onClick={() => handleTripClick(trip._id)}
-            />
-          ))}
-        </div>
-      )}
-
-      <CreateTripModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateTrip}
-      />
+      <Footer />
+      <CreateTripModal isOpen={isOpen} onClose={onClose} onSubmit={onSubmit} />
     </div>
   );
-} 
+}

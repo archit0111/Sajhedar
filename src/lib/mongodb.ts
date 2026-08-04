@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 //console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
 //console.log('NODE_ENV:', process.env.NODE_ENV);
 
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/trips';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/Sajhedar';
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;

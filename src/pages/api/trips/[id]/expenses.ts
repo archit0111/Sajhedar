@@ -32,25 +32,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ error: 'Failed to fetch expenses' });
       }
     } else if (req.method === 'POST') {
+      console.log('Received payload:', req.body);
       try {
-        const { description, amount, payer, date, splitType, splits } = req.body;
+        const { description, amount, payer, date, splitType, splits, tripId } = req.body;
         if (!description || !amount || !payer || !date) {
           return res.status(400).json({ error: 'Missing required fields' });
         }
-        // For now, split equally among all trip members
-        const splitAmount = amount / (splits?.length || 1);
-        const splitArray = (splits && splits.length > 0)
-          ? splits.map((s: { memberId: string; amount: number }) => ({ memberId: s.memberId, amount: s.amount }))
-          : [{ memberId: payer, amount: splitAmount }];
         const expense = new Expense({
-          tripId: id,
-          payer,
-          amount,
+          tripId:tripId,
           description,
-          date,
-          splitType: splitType || 'equal',
-          splits: splitArray,
-        });
+          amount:Number(amount),
+          payer,
+          date:new Date(date),
+          splitType:splitType,
+          splits:splits
+        })
         await expense.save();
         res.status(201).json(expense);
       } catch (error) {

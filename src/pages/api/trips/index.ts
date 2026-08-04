@@ -7,7 +7,7 @@ import User from '@/models/User';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const session = await getServerSession(req, res, {});
-    
+
     if (!session) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -19,12 +19,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const { name, startDate, endDate, currency, members } = req.body;
 
-        if (!name || !startDate || !endDate || !currency || !members) {
+        if (!name || !startDate || !currency || !members) {
           return res.status(400).json({ error: 'Missing required fields' });
         }
 
         // Find the user by email to get their ObjectId
-        const user = await User.findOne({ email: session.user?.email });
+        const user = await User.findOne({
+          email: { $regex: new RegExp(`^${session.user?.email}$`, 'i') }
+        });
         if (!user) {
           return res.status(404).json({ error: 'User not found' });
         }
@@ -54,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const trips = await Trip.find({ createdBy: user._id })
           .sort({ createdAt: -1 })
           .lean();
-        
+
         res.status(200).json(trips);
       } catch (error) {
         console.error('Error fetching trips:', error);

@@ -8,7 +8,7 @@ import React from 'react';
 const createTripSchema = z.object({
   name: z.string().min(1, 'Trip name is required'),
   startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
+  endDate: z.string().min(0),
   currency: z.string().min(1, 'Currency is required'),
   members: z.array(z.object({
     name: z.string().min(1, 'Member name is required'),
@@ -79,11 +79,11 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-teal-50 border-2 border-teal-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">{isEditMode ? 'Edit Trip' : 'Create New Trip'}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h2 className="text-2xl text-teal-800 font-bold">{isEditMode ? 'Edit Trip' : 'Create New Trip'}</h2>
+          <button onClick={onClose} type='button' className="text-gray-500 hover:text-gray-700">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -121,7 +121,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
+                End Date  <span className='font-light'>(Optional)</span>
               </label>
               <input
                 {...register('endDate')}
