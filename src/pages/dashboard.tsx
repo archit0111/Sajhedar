@@ -10,6 +10,17 @@ import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
 import { ITrip } from '@/models/Trip';
 
+interface ClientTrip {
+  _id: string;
+  name: string;
+  startDate: string | Date;
+  endDate?: string | Date;
+  currency: string;
+  createdBy: string;
+  members: { name: string }[];
+  [key: string]: unknown;
+}
+
 
 interface Member {
   name?: string | null;
@@ -20,7 +31,7 @@ interface Member {
 export default function Dashboard() {
 
   const router = useRouter();
-  const [trips, setTrips] = useState([]);
+  const [trips, setTrips] = useState<ClientTrip[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
 
@@ -77,7 +88,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(resData.error || 'Failed to create trip');
       console.log("Trip created successfully!");
       const newTrip = resData.trip || resData;
-      setTrips((prevTrips):any => [newTrip, ...prevTrips]);
+      setTrips((prevTrips) => [newTrip, ...prevTrips]);
     } catch (e) {
       console.error('Error in creating trip:', e);
     }
@@ -108,7 +119,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
-            {trips.map((trip: ITrip) => (
+            {trips.map((trip: ClientTrip) => (
               <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
             ))}
           </div>
