@@ -9,6 +9,12 @@ interface AddExpanseModalProps {
   onExpenseAdded?: () => void;
 }
 
+interface Member {
+  name?: string | null;
+  email?: string | null;
+  [key: string]: unknown;
+}
+
 export default function AddExpanseModal ({id, isOpen, onClose, onExpenseAdded}:AddExpanseModalProps){
     const {data:session,status}=useSession();
     const [selectedOption,setSelectedOption]=useState<string>('equal');
@@ -27,7 +33,7 @@ export default function AddExpanseModal ({id, isOpen, onClose, onExpenseAdded}:A
                     throw new Error("Error in fetching trip!");
                 }
                 setTrip(trip);
-                setPaidBy(trip.members.find((m:any)=> m.email === session?.user?.email || m.name === session?.user?.name))
+                setPaidBy(trip.members.find((m:Member)=> m.email === session?.user?.email || m.name === session?.user?.name))
             }catch(e){
                 console.error("Failed to fetch trip", e);
             }

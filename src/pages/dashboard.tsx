@@ -8,11 +8,18 @@ import CreateTripModal from '@/components/CreateTripModal';
 import { useSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
+import { ITrip } from '@/models/Trip';
+
+
+interface Member {
+  name?: string | null;
+  email?: string | null;
+  [key: string]: unknown;
+}
 
 export default function Dashboard() {
 
   const router = useRouter();
-  const [error, setError] = useState('');
   const [trips, setTrips] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
@@ -59,7 +66,7 @@ export default function Dashboard() {
     setIsOpen(false);
   }
 
-  const onSubmit = async (data:any) => {
+  const onSubmit = async (data:Member) => {
     try {
       const res = await fetch('/api/trips', {
         method: 'POST',
@@ -70,7 +77,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(resData.error || 'Failed to create trip');
       console.log("Trip created successfully!");
       const newTrip = resData.trip || resData;
-      setTrips((prevTrips): any => [newTrip, ...prevTrips]);
+      setTrips((prevTrips):any => [newTrip, ...prevTrips]);
     } catch (e) {
       console.error('Error in creating trip:', e);
     }
@@ -101,8 +108,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
-            {trips.map((trip: any) => (
-              <TripCard key={trip._id} trip={trip}/>
+            {trips.map((trip: ITrip) => (
+              <TripCard key={String(trip._id)} trip={trip}/>
             ))}
           </div>
         )}
