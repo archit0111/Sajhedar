@@ -109,7 +109,7 @@ export default function Dashboard() {
         ) : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
             {trips.map((trip: ITrip) => (
-              <TripCard key={String(trip._id)} trip={trip}/>
+              <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
             ))}
           </div>
         )}

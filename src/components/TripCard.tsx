@@ -1,10 +1,9 @@
-import { ITrip } from '@/models/Trip';
 import { format } from 'date-fns';
 import { Calendar, Users, DollarSign } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-interface TripCardProps extends ITrip {
+interface TripCardProps {
   trip: {
     _id: string;
     name: string;
