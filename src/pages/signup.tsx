@@ -2,11 +2,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+interface StatusState {
+  type?: "success" | "error" | "";
+  message?: string;
+}
+
 export default function Signup(){
   const [name,setName]=useState('');
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
-  const [status,setStatus]=useState<any>({});
+  const [status,setStatus]=useState<StatusState>({});
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState(false);
   const router = useRouter();
@@ -17,10 +22,10 @@ export default function Signup(){
   try{
     //Trigger google OAuth
     await signIn("google");
-  }catch(e:any){
+  }catch(e){
     setStatus({
       type:"error",
-      message:e.message || "Faild to sign in wiht google"
+      message: e instanceof Error ? e.message : "Faild to sign in wiht google"
     })
   }
  }
@@ -62,10 +67,10 @@ export default function Signup(){
         message:"Account created! Redirecting to login..."
       })
 
-    }catch(e:any){
+    }catch(e){
       setStatus({
         type:"error",
-        message:e.message || "Something went wrong. Please try again."
+        message:e instanceof Error ?e.message : "Something went wrong. Please try again."
       })
     }finally{
       setLoading(false);

@@ -44,8 +44,8 @@ const tripExpenses = [
 
 
 export default function TripDetailsPage() {
-  const { data: session, status } = useSession();
-  const [error, setError] = useState('');
+  const { data: session } = useSession();
+  // const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [trip, setTrip] = useState<ITrip>();
   const router = useRouter();
@@ -64,8 +64,8 @@ export default function TripDetailsPage() {
           throw Error(trip.message);
         }
         setTrip(trip);
-      } catch (e: any) {
-        setError(e || 'Some error occured')
+      } catch (e) {
+        console.log(e);
       } finally {
         setLoading(false);
       }
@@ -95,7 +95,7 @@ export default function TripDetailsPage() {
     setIsOpen(prev => !prev);
   }
   const totalTripSpend = tripExpenses.reduce((acc, curr) => acc + curr.totalAmount, 0);
-  const sharePerPerson = trip?.members?.length! > 0 && trip?.members?.length != undefined && totalTripSpend > 0 ? totalTripSpend / trip?.members?.length : 0;
+  // const sharePerPerson = trip?.members?.length! > 0 && trip?.members?.length != undefined && totalTripSpend > 0 ? totalTripSpend / trip?.members?.length : 0;
 
 
   return (
@@ -223,7 +223,7 @@ export default function TripDetailsPage() {
             </div>
 
             <div className="space-y-3">
-              {expenses?.map((expense: any) => (
+              {expenses?.map((expense) => (
                 <div
                   key={expense.id}
                   className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
@@ -237,7 +237,7 @@ export default function TripDetailsPage() {
                         {expense.description}
                       </h4>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Paid by <span className="text-slate-700 font-medium">{expense.paidBy}</span> • {format(new Date(expense.date).toLocaleDateString(), 'dd MMM yyyy')}
+                        Paid by <span className="text-slate-700 font-medium">{expense.payer}</span> • {format(new Date(expense.date).toLocaleDateString(), 'dd MMM yyyy')}
                       </p>
                     </div>
                   </div>
