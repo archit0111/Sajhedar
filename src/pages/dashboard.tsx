@@ -8,7 +8,6 @@ import CreateTripModal from '@/components/CreateTripModal';
 import { useSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
-import { ITrip } from '@/models/Trip';
 
 interface ClientTrip {
   _id: string;
