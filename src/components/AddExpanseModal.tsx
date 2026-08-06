@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useSession } from 'next-auth/react';
 import { ITrip } from "@/models/Trip";
-import { IExpense } from "@/models/Expense";
 
 interface AddExpanseModalProps {
     id:string | null;
@@ -12,7 +11,7 @@ interface AddExpanseModalProps {
 
 export default function AddExpanseModal ({id, isOpen, onClose, onExpenseAdded}:AddExpanseModalProps){
     const {data:session,status}=useSession();
-    const [selectedOption,setSelectedOption]=useState<String>('equal');
+    const [selectedOption,setSelectedOption]=useState<string>('equal');
     const [trip,setTrip]= useState<ITrip | null>(null);
     const [amount,setAmount]=useState<number  | null>(null);
     const [description,setDescription]=useState<string>('');
