@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  TrendingUp,
-  TrendingDown,
-  Plus,
-  MapPin
+  Plus
 } from 'lucide-react';
 import Nav from '@/components/Nav';
 import TripCard from '@/components/TripCard';
@@ -15,11 +12,9 @@ import { useRouter } from 'next/router';
 export default function Dashboard() {
 
   const router = useRouter();
-  const [loadingTrips, setLoadingTrips] = useState(false);
   const [error, setError] = useState('');
   const [trips, setTrips] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [creator,setCreator]=useState('');
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -33,7 +28,6 @@ export default function Dashboard() {
       if (!session) return;
 
       try {
-        setLoadingTrips(true);
         const res = await fetch('/api/trips');
 
         if (!res.ok) {
@@ -42,10 +36,8 @@ export default function Dashboard() {
         const data = await res.json();
         setTrips(data);
         
-      } catch (e: any) {
-        setError(e.message || "something went wrong!");
-      } finally {
-        setLoadingTrips(false);
+      } catch (e) {
+        console.log(e);
       }
     }
     fetchUserTrips();
@@ -67,7 +59,7 @@ export default function Dashboard() {
     setIsOpen(false);
   }
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data:any) => {
     try {
       const res = await fetch('/api/trips', {
         method: 'POST',
@@ -110,7 +102,7 @@ export default function Dashboard() {
         ) : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
             {trips.map((trip: any) => (
-              <TripCard trip={trip}/>
+              <TripCard key={trip._id} trip={trip}/>
             ))}
           </div>
         )}

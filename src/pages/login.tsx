@@ -52,7 +52,7 @@ export default function Login(){
         // Redirect to dashboard or homepage
         router.push("/dashboard");
       }
-    } catch (err) {
+    } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "Failed to sign in";
       setStatus({
         type:"error",
