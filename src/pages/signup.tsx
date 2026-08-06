@@ -121,7 +121,7 @@ export default function Signup(){
             onChange={(e)=>setPassword(e.target.value)}/>
           </div>
           <div className="text-center">
-            <button type="submit" className="bg-green-400 hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 mb-4 focus:scale-95 transition-all sm:text-lg font-semibold text-white">SignUp</button>
+            <button type="submit" className="bg-green-400 hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 mb-4 focus:scale-95 transition-all sm:text-lg font-semibold text-white">{loading?"Please wait..":"SignUp"}</button>
             <p className="font-extralight text-sm">Already have account?<span onClick={()=>router.push('/login')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Login</span></p>
           </div>
         </form>

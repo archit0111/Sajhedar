@@ -13,10 +13,11 @@ export default function Login(){
     try{
       //Trigger google OAuth
       await signIn("google");
-    }catch(e:any){
+    }catch(e){
+      const errorMessage = e instanceof Error ? e.message : "Failed to sign in with Google";
       setStatus({
         type:"error",
-        message:e.message || "Faild to sign in wiht google"
+        message:errorMessage
       })
     }
    }
@@ -25,6 +26,7 @@ export default function Login(){
     e.preventDefault();
     setStatus({ type: "", message: "" });
     if (!email || !password) {
+      setError(true);
       setStatus({ type: "error", message: "Please fill in all fields." });
       return;
     }
@@ -50,10 +52,11 @@ export default function Login(){
         // Redirect to dashboard or homepage
         router.push("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = e instanceof Error ? e.message : "Failed to sign in";
       setStatus({
-        type: "error",
-        message: err.message || "An unexpected error occurred. Please try again.",
+        type:"error",
+        message:errorMessage
       });
     } 
   }
@@ -78,7 +81,7 @@ export default function Login(){
     <div className="flex h-screen items-center justify-center">
       <div className="p-6 m-4 w-[80%] sm:w-[50%] lg:w-[30%] shadow-lg rounded-2xl bg-teal-50">
         <h3 className="font-bold text-2xl text-teal-800 text-center my-2 pb-5">Login</h3>
-        <div className={error===true?"bg-red-300 rounded-xl h-fit py-4 w-[80%] justify-self-center text-center font-light mb-2":"hidden"}>{<p className="text-sm">{error}</p>}</div>
+        <div className={error===true?"bg-red-300 rounded-xl h-fit py-4 w-[80%] justify-self-center text-center font-light mb-2":"hidden"}>{<p className="text-sm">{status.message}</p>}</div>
         <form onSubmit={(e)=>handleSubmit(e)} className="p-2 w-full">
           <div className="pb-4 flex flex-col">
             <div>
