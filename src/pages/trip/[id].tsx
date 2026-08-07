@@ -52,6 +52,8 @@ export default function TripDetailsPage() {
   const { id } = router.query;
   const [isOpen, setIsOpen] = useState(false);
   const [expenses, setExpenses] = useState<IExpense[]>([]);
+  const [totalTripSpend,setTotalTripSpend]=useState<number>();
+  const [spendByUser,setSpendByUser]=useState<number>()
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -82,10 +84,21 @@ export default function TripDetailsPage() {
           console.log("Error in fetching expanses!",res);
         }
         setExpenses(expenses);
+        const totalAmount = expenses.reduce((acc:number, curr:IExpense) => acc + curr.amount, 0);
+        const userPaid = expenses.reduce((acc:number,curr:IExpense)=>acc+(curr.payer === session.user?.name ?curr.amount:0),0);
+        setTotalTripSpend(totalAmount);
+        setSpendByUser(userPaid);
       } catch (e) {
         console.log("error in fetching expanses", e);
       }
   }
+  // const fetchPayerDetails = async () => {
+  //   try{
+  //     const res = fetch('/api/users')
+  //   }catch(e){
+  //     console.log("error in fetching Payer Details", e);
+  //   }
+  // }
 
   useEffect(() => {
     fetchExpanses();
@@ -94,7 +107,6 @@ export default function TripDetailsPage() {
   const onClose = () => {
     setIsOpen(prev => !prev);
   }
-  const totalTripSpend = tripExpenses.reduce((acc, curr) => acc + curr.totalAmount, 0);
   // const sharePerPerson = trip?.members?.length! > 0 && trip?.members?.length != undefined && totalTripSpend > 0 ? totalTripSpend / trip?.members?.length : 0;
 
 
@@ -155,7 +167,7 @@ export default function TripDetailsPage() {
         </div>
 
         {/* Balance Cards Panel */}
-        <div className={`${!true ? "grid" : 'hidden'} grid-cols-1 md:grid-cols-3 gap-5 mb-20`}>
+        <div className={`${expenses.length !== 0 ? "grid" : 'hidden'} grid-cols-1 md:grid-cols-3 gap-5 mb-20`}>
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Group Spending</p>
             <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {totalTripSpend}</p>
@@ -165,7 +177,7 @@ export default function TripDetailsPage() {
             <div>
               <p className="text-xs font-semibold text-emerald-700 tracking-wider uppercase">Your Net Balance</p>
               <div className="flex items-center space-x-2 mt-1">
-                <span className="text-2xl font-bold text-emerald-600">+ {trip?.currency} 255</span>
+                <span className="text-2xl font-bold text-emerald-600">+ {trip?.currency} {spendByUser}</span>
                 {true ? <TrendingUp size={18} className="text-emerald-500" /> : <TrendingDown size={18} className="text-red-400" />}
               </div>
             </div>
@@ -176,7 +188,7 @@ export default function TripDetailsPage() {
           <button onClick={onClose}
             className="flex cursor-pointer items-center space-x-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-3 my-5 mb-8 rounded-lg transition-all duration-200 shadow-sm active:scale-95 text-sm">
             <Plus size={18} />
-            <span>Add First Expense</span>
+            <span>Add Expense</span>
           </button>
         </div>
 

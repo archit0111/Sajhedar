@@ -24,8 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Find the user by email to get their ObjectId
+        console.log(session.user?.email);
+        console.log(session);
         const user = await User.findOne({
-          email: { $regex: new RegExp(`^${session.user?.email}$`, 'i') }
+          email: { $regex: new RegExp(`^${session?.user?.email?.toLowerCase()}$`, 'i') }
         });
         if (!user) {
           return res.status(404).json({ error: 'User not found' });

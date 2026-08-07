@@ -79,8 +79,7 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
         amount: amount,
         splitType: selectedOption,
         splits: splits,
-        // 3. Fixed: Safely extract string ID from paidBy object
-        payer: paidBy?._id ? String(paidBy._id) : '',
+        payer: paidBy?.name ? String(paidBy.name) : '',
         date: Date.now(),
       };
 
