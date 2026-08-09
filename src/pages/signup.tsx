@@ -53,7 +53,6 @@ export default function Signup(){
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({name,email,password})
       })
-      const data=await res.json();
       if(!res.ok){
         if(res.status===422){
           alert("User Already Exist! Login Please..")

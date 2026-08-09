@@ -22,7 +22,7 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
   const [trip, setTrip] = useState<ITrip | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [description, setDescription] = useState<string>('');
-  const [paidBy, setPaidBy] = useState<String>(session?.user?.name ?? '');
+  const [paidBy, setPaidBy] = useState<string>(session?.user?.name ?? '');
 
   useEffect(() => {
     const fetchTrip = async () => {
