@@ -118,7 +118,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
-            {trips.map((trip: ClientTrip) => (
+            {trips.toReversed().map((trip: ClientTrip) => (
               <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
             ))}
           </div>

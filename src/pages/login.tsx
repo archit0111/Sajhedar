@@ -6,6 +6,7 @@ export default function Login(){
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [error,setError]=useState(false);
+  const [loading,setLoading]=useState(false);
   const [status,setStatus]=useState({type:'',message:''});
   const router = useRouter();
 
@@ -32,6 +33,7 @@ export default function Login(){
     }
     try {
       // Use NextAuth signIn with 'credentials' provider
+      setLoading(true);
       const res = await signIn("credentials", {
         redirect: false,
         email,
@@ -41,7 +43,7 @@ export default function Login(){
       if (res?.error) {
         setStatus({
           type: "error",
-          message: res.error || "Invalid credentials.",
+          message: "Invalid credentials. Please try agian..",
         });
       } else {
         setStatus({
@@ -58,7 +60,9 @@ export default function Login(){
         type:"error",
         message:errorMessage
       });
-    } 
+    } finally{
+      setLoading(false);
+    }
   }
 
   return(
@@ -102,8 +106,8 @@ export default function Login(){
             onChange={(e)=>setPassword(e.target.value)}/>
           </div>
           <div className="text-center">
-            <button type="submit" className="bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all">Login</button>
-            <p className="font-extralight text-sm">New User? <span onClick={()=>router.push('/signup')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Signup</span></p>
+            <button type="submit" className={`bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>{loading?"Please wait..":"Login"}</button>
+            <p className="font-extralight text-medium">New User? <span onClick={()=>router.push('/signup')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Signup</span></p>
           </div>
         </form>
         <div className="mt-4 mb-2 text-center">

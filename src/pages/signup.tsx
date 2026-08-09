@@ -42,12 +42,12 @@ export default function Signup(){
       return
     }
     if(password.length<6){
+      setError(true);
       return setStatus({type:'error',message:"Password must be of 6 characters"})
     }
     setLoading(true);
     
     try{
-      alert(name+email+password)
       const res = await fetch('api/auth/signup',{
         method:"POST",
         headers:{"Content-Type":"application/json"},
@@ -56,10 +56,9 @@ export default function Signup(){
       const data=await res.json();
       if(!res.ok){
         if(res.status===422){
-          setStatus({type:'error',message:data.message+" Login please..."});
+          alert("User Already Exist! Login Please..")
           router.push('/login')
         }
-        throw new Error(data.message||"Failed to create account");
       }
 
       setStatus({
@@ -121,8 +120,8 @@ export default function Signup(){
             onChange={(e)=>setPassword(e.target.value)}/>
           </div>
           <div className="text-center">
-            <button type="submit" className="bg-green-400 hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 mb-4 focus:scale-95 transition-all sm:text-lg font-semibold text-white">{loading?"Please wait..":"SignUp"}</button>
-            <p className="font-extralight text-sm">Already have account?<span onClick={()=>router.push('/login')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Login</span></p>
+            <button type="submit" className={`bg-green-400 ${loading?"cursor-not-allowed":""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading?"Please wait..":"SignUp"}</button>
+            <p className="font-extralight text-medium">Already have account?<span onClick={()=>router.push('/login')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Login</span></p>
           </div>
         </form>
         <div className="mt-4 mb-2 text-center">

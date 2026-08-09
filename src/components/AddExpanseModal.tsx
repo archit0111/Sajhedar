@@ -22,9 +22,7 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
   const [trip, setTrip] = useState<ITrip | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [description, setDescription] = useState<string>('');
-  
-  // 1. Fixed: Properly type paidBy as Member | null
-  const [paidBy, setPaidBy] = useState<Member | null>(null);
+  const [paidBy, setPaidBy] = useState<String>(session?.user?.name ?? '');
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -36,12 +34,6 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
           throw new Error("Error in fetching trip!");
         }
         setTrip(tripData);
-        
-        // 2. Finds current logged-in user in trip members
-        const currentMember = tripData.members?.find(
-          (m: Member) => m.email === session?.user?.email || m.name === session?.user?.name
-        );
-        setPaidBy(currentMember || null);
       } catch (e) {
         console.error("Failed to fetch trip", e);
       }
@@ -54,6 +46,12 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
 
   const handelAddExpanse = async (e: FormEvent) => {
     e.preventDefault();
+    const selectedPayer = paidBy || session?.user?.name;
+
+    if (selectedPayer==='') {
+      alert("Please select a valid payer.");
+      return;
+    }
     try {
       const memberCount = trip?.members?.length || 0;
       let splits = null;
@@ -79,7 +77,7 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
         amount: amount,
         splitType: selectedOption,
         splits: splits,
-        payer: paidBy?.name ? String(paidBy.name) : '',
+        payer: paidBy===''?session?.user?.name:paidBy,
         date: Date.now(),
       };
 
@@ -152,7 +150,16 @@ export default function AddExpanseModal({ id, isOpen, onClose, onExpenseAdded }:
             </div>
 
             <div className="block text-sm font-medium text-gray-700 mt-2">
-              Payer: <span className="font-semibold text-teal-800">{session?.user?.name || 'Unknown'}</span>
+              <label htmlFor="payer" className="block text-sm font-medium text-gray-700 mb-1">
+                Payer
+              </label>
+              <select id="payer"
+              required
+              onChange={(e)=>setPaidBy(e.target.value)}>
+                {trip?.members?.map((m)=>(
+                  <option key={String(m._id || m.name)} value={m.name}>{m.name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="justify-between flex gap-4 pt-2">
