@@ -8,6 +8,15 @@ import CreateTripModal from '@/components/CreateTripModal';
 import { useSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
+import {CreateTripForm} from '@/components/CreateTripModal';
+
+interface Member {
+  name: string | null;
+  email?: string | null;
+  role?: 'member' | 'admin' | 'creator';
+  [key: string]: unknown;
+}
+
 
 interface ClientTrip {
   _id: string;
@@ -16,14 +25,7 @@ interface ClientTrip {
   endDate?: string | Date;
   currency: string;
   createdBy: string;
-  members: { name: string }[];
-  [key: string]: unknown;
-}
-
-
-interface Member {
-  name?: string | null;
-  email?: string | null;
+  members: Member[];
   [key: string]: unknown;
 }
 
@@ -76,7 +78,8 @@ export default function Dashboard() {
     setIsOpen(false);
   }
 
-  const onSubmit = async (data:Member) => {
+  const onSubmit = async (data:CreateTripForm) => {
+
     try {
       const res = await fetch('/api/trips', {
         method: 'POST',
@@ -87,7 +90,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(resData.error || 'Failed to create trip');
       console.log("Trip created successfully!");
       const newTrip = resData.trip || resData;
-      setTrips((prevTrips) => [newTrip, ...prevTrips]);
+      setTrips((prevTrips) => [...prevTrips,newTrip]);
     } catch (e) {
       console.error('Error in creating trip:', e);
     }

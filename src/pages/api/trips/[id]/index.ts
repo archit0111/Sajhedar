@@ -68,23 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error updating trip:', error);
         res.status(500).json({ error: 'Failed to update trip' });
       }
-    } else if (req.method === 'DELETE') {
-      try {
-        const user = await User.findOne({ email: session.user?.email });
-        if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-        const deletedTrip = await Trip.findOneAndDelete({ _id: id, createdBy: user._id });
-        if (!deletedTrip) {
-          return res.status(404).json({ error: 'Trip not found or not authorized' });
-        }
-        res.status(200).json({ message: 'Trip deleted successfully' });
-      } catch (error) {
-        console.error('Error deleting trip:', error);
-        res.status(500).json({ error: 'Failed to delete trip' });
-      }
     } else {
-      res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
+      res.setHeader('Allow', ['GET', 'PUT']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error) {

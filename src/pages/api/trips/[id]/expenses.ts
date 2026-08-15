@@ -32,7 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ error: 'Failed to fetch expenses' });
       }
     } else if (req.method === 'POST') {
-      console.log('Received payload:', req.body);
       try {
         const { description, amount, payer, date, splitType, splits, tripId } = req.body;
         if (!description || !amount || !payer || !date) {

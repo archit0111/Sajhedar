@@ -8,15 +8,16 @@ import React from 'react';
 const createTripSchema = z.object({
   name: z.string().min(1, 'Trip name is required'),
   startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(0),
+  endDate: z.string().optional().or(z.literal('')).nullable(),
   currency: z.string().min(1, 'Currency is required'),
   members: z.array(z.object({
     name: z.string().min(1, 'Member name is required'),
     email: z.string().email().optional().or(z.literal('')),
+    role: z.enum(['creator', 'admin', 'member']),
   })).min(1, 'At least one member is required'),
 });
 
-type CreateTripForm = z.infer<typeof createTripSchema>;
+export type CreateTripForm = z.infer<typeof createTripSchema>;
 
 interface CreateTripModalProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
   } = useForm<CreateTripForm>({
     resolver: zodResolver(createTripSchema),
     defaultValues: initialData || {
-      members: [{ name: '', email: '' }],
+      members: [{ name: '', email: '' , role:'member'}],
       currency: 'USD',
     },
   });
@@ -54,7 +55,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
   const members = watch('members');
 
   const addMember = () => {
-    setValue('members', [...members, { name: '', email: '' }]);
+    setValue('members', [...members, { name: '', email: '' ,role:'member'}]);
   };
 
   const removeMember = (index: number) => {

@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import Expense from '@/models/Expense';
 import { connectDB } from '@/lib/mongodb';
+import DeletedExpenses from '@/models/DeletedExpenses';
+import Trip from '@/models/Trip';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -20,6 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!expense) {
           return res.status(404).json({ error: 'Expense not found' });
         }
+        console.log(expense)
         res.status(200).json(expense);
       } catch (error) {
         console.error('Error fetching expense:', error);
@@ -47,6 +50,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } catch (error) {
         console.error('Error updating expense:', error);
         res.status(500).json({ error: 'Failed to update expense' });
+      }
+    } else if (req.method === 'DELETE') {
+      try {
+        const trip = await  Trip.findById(id);
+        const userRequesting = trip.members.find((m:any)=>m.email?.toLowerCase()===session?.user?.email?.toLocaleLowerCase());
+        if(userRequesting.role ==='creator' || userRequesting.role ==='admin'){
+          const deletedExpense = await Expense.findOneAndDelete({
+            _id: expenseId,
+            tripId: id,
+          });
+          
+          if (!deletedExpense) {
+            return res.status(404).json({ error: 'Expense not found' });
+          }
+          const remover = session.user?.name;
+          
+          const newDeletedExpense = new DeletedExpenses({
+            tripId: deletedExpense.tripId,
+            description: deletedExpense.description,
+            amount: deletedExpense.amount,
+            payer: deletedExpense.payer,
+            remover: remover,
+            date: deletedExpense.date,
+            splitType: deletedExpense.splitType,
+            splits: deletedExpense.splits,
+          });
+          
+          await newDeletedExpense.save();
+  
+          return res.status(200).json({ message: 'Expense deleted successfully', id: expenseId });
+        }
+        return res.status(403).json({error: 'Only the trip creator and admin can delete expenses.'})
+        
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+        return res.status(500).json({ error: 'Failed to delete expense' });
       }
     } else {
       res.setHeader('Allow', ['GET', 'PUT']);

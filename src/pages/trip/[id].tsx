@@ -13,11 +13,12 @@ import {
   TrendingUp,
   Clock,
   TrendingDown,
+  Trash2,
 } from 'lucide-react';
 import { ITrip } from '@/models/Trip';
 import AddExpanseModal from '@/components/AddExpanseModal';
 import { IExpense } from '@/models/Expense';
-// import EditMembersModal from '@/components/EditMembersModal';
+import { IDeletedExpense } from '@/models/DeletedExpenses';
 
 interface IMembersWithRemainingAmount {
   id: string,
@@ -39,6 +40,13 @@ export default function TripDetailsPage() {
   const [spendByUser, setSpendByUser] = useState<number>()
   const [userRemaningAmount, setUserRemaningAmount] = useState<number>(0)
   const [membersRemainingAmount, setMembersRemaningAmount] = useState<IMembersWithRemainingAmount[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [deletedExpenses, setDeletedExpenses] = useState<IDeletedExpense[]>([]);
+  const [UserRole,setUserRole]=useState<string | null >('');
+
+  const toggelButton = (id:string)=>{
+    setSelected((prev)=>prev===id?null:id);
+  }
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -51,6 +59,7 @@ export default function TripDetailsPage() {
           throw Error(trip.message);
         }
         setTrip(trip);
+        roleOfUser(trip);
       } catch (e) {
         console.log(e);
       } finally {
@@ -59,6 +68,12 @@ export default function TripDetailsPage() {
     }
     fetchTrip();
   }, [session, id])
+
+  const roleOfUser=(trip:ITrip)=>{
+    const user = trip.members.find((m:any)=>m.email===session?.user?.email);
+    const userRole = String(user?.role);
+    setUserRole(userRole);
+  }
 
   const fetchExpanses = async () => {
     if (!session || !id || id === 'undefined') return;
@@ -82,59 +97,131 @@ export default function TripDetailsPage() {
   // }
 
   useEffect(() => {
-  const updateAmountPanel = async () => {
-    if (!expenses || !trip || !trip.members) return;
-    try {
-      const memberCount = trip.members.length || 1;
-      const totalAmount = expenses.reduce((acc: number, curr: IExpense) => acc + (Number(curr.amount) || 0), 0);
-      
-      // Fair share per person across all expenses
-      const fairShare = totalAmount / memberCount;
+    const updateAmountPanel = async () => {
+      if (!expenses || !trip || !trip.members) return;
+      try {
+        const memberCount = trip.members.length || 1;
+        const totalAmount = expenses.reduce((acc: number, curr: IExpense) => acc + (Number(curr.amount) || 0), 0);
 
-      const spendByUser = expenses.reduce((acc: number, curr: IExpense) => {
-        const isUser = String(curr.payer).toLowerCase() === String(session?.user?.name).toLowerCase();
-        return acc + (isUser ? Number(curr.amount) || 0 : 0);
-      }, 0);
+        // Fair share per person across all expenses
+        const fairShare = totalAmount / memberCount;
 
-      setTotalTripSpend(totalAmount);
-      setSpendByUser(spendByUser);
-      setUserRemaningAmount(spendByUser - fairShare);
-
-      // Calculate paid and net balance for each member
-      const membersWithRemainingAmount = trip.members.map((m) => {
-        const totalExpenseOfM = expenses.reduce((acc: number, curr: IExpense) => {
-          const isPayer = String(curr.payer).toLowerCase() === String(m.name).toLowerCase();
-          return acc + (isPayer ? Number(curr.amount) || 0 : 0);
+        const spendByUser = expenses.reduce((acc: number, curr: IExpense) => {
+          const isUser = String(curr.payer).toLowerCase() === String(session?.user?.name).toLowerCase();
+          return acc + (isUser ? Number(curr.amount) || 0 : 0);
         }, 0);
 
-        // Net balance = Total Paid - Fair Share
-        const netBalance = totalExpenseOfM - fairShare;
+        setTotalTripSpend(totalAmount);
+        setSpendByUser(spendByUser);
+        setUserRemaningAmount(spendByUser - fairShare);
 
-        return {
-          id: m._id ? String(m._id) : (m.userId ? String(m.userId) : ''),
-          name: m.name || '',
-          totalPaid: Number(totalExpenseOfM.toFixed(0)),
-          remainingAmount: Number(netBalance.toFixed(0))
-        };
-      });
+        // Calculate paid and net balance for each member
+        const membersWithRemainingAmount = trip.members.map((m) => {
+          const totalExpenseOfM = expenses.reduce((acc: number, curr: IExpense) => {
+            const isPayer = String(curr.payer).toLowerCase() === String(m.name).toLowerCase();
+            return acc + (isPayer ? Number(curr.amount) || 0 : 0);
+          }, 0);
 
-      setMembersRemaningAmount(membersWithRemainingAmount);
-    } catch (e) {
-      console.error("error in calculating amount", e);
-    }
-  };
+          // Net balance = Total Paid - Fair Share
+          const netBalance = totalExpenseOfM - fairShare;
 
-  updateAmountPanel();
-}, [expenses, trip, session]);
+          return {
+            id: m._id ? String(m._id) : (m.userId ? String(m.userId) : ''),
+            name: m.name || '',
+            totalPaid: Number(totalExpenseOfM.toFixed(0)),
+            remainingAmount: Number(netBalance.toFixed(0))
+          };
+        });
+
+        setMembersRemaningAmount(membersWithRemainingAmount);
+      } catch (e) {
+        console.error("error in calculating amount", e);
+      }
+    };
+
+    updateAmountPanel();
+  }, [expenses, trip, session]);
 
   useEffect(() => {
     fetchExpanses();
-  }, [session, id])
+  }, [session, id]);
+
+  useEffect(() => {
+
+  }, [session, trip, deletedExpenses]);
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      const expense = expenses.find((exp)=>exp._id || exp.id === expenseId);
+      if(!expense){
+        alert("Expense Already Removed!");
+        return;
+      }
+      const res = await fetch(`/api/trips/${id}/expenses/${expenseId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) {
+        console.log("Error in deleting expanse!", res);
+      }
+      if(res.status===403){
+        alert('Access not allowed!');
+        return;
+      }
+      const deletedExpense: IDeletedExpense ={
+        ...expense,
+        remover:session?.user?.name ?? 'UnKnown User',
+      } as unknown as IDeletedExpense;
+      
+      fetchExpanses();
+      setDeletedExpenses((prev)=>[...prev,deletedExpense]);
+    } catch (e) {
+      console.error("Something went wrong!", e);
+    }
+  }
+
+  useEffect(()=>{
+    const fetchDeletedExpense = async()=>{
+      try{
+        const res = await fetch(`/api/trips/${id}/deleted_expenses`);
+        const data = await res.json();
+        if(res.ok){
+          setDeletedExpenses(data);
+        }
+      }catch(e){
+        console.error("Error in fetching deleted expenses!");
+      }
+    }
+    fetchDeletedExpense();
+  },[session,id]);
 
   const onClose = () => {
     setIsOpen(prev => !prev);
-  }
+  };
 
+  //API CALLING FOR UPDATING ROLE CHANGE
+
+  const handleRoleChange = async (email:string, newRole:string)=>{
+    try{
+      const res = await fetch(`/api/trips`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:email,role:newRole,tripId:id})
+      });
+      const data = await res.json();
+      if(!res.ok){
+        throw new Error(data.error || 'Failed tp update role');
+      }
+      setTrip((prev:any)=>{
+        if(!prev) return prev;
+        return{
+          ...prev,
+          members:prev.members.map((m:any)=>m.email === email?{...m,role:newRole}:m)
+        }
+      })
+    }catch(e){
+      alert('Could not update role!');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-bl from-emerald-50/60 via-slate-50 to-amber-50/50 text-slate-800 font-sans antialiased">
@@ -205,15 +292,15 @@ export default function TripDetailsPage() {
             <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {spendByUser}</p>
           </div>
 
-          <div className={`${userRemaningAmount>0?'bg-emerald-50/40 border-emerald-100':'bg-red-50/40 border-red-100'} border rounded-2xl p-6 shadow-sm flex flex-col justify-between`}>
+          <div className={`${userRemaningAmount > 0 ? 'bg-emerald-50/40 border-emerald-100' : 'bg-red-50/40 border-red-100'} border rounded-2xl p-6 shadow-sm flex flex-col justify-between`}>
             <div>
-              <p className={`text-xs font-semibold ${userRemaningAmount>0?'text-emerald-700':'text-red-700'} tracking-wider uppercase`}>Your Net Balance</p>
+              <p className={`text-xs font-semibold ${userRemaningAmount > 0 ? 'text-emerald-700' : 'text-red-700'} tracking-wider uppercase`}>Your Net Balance</p>
               <div className="flex items-center space-x-2 mt-1">
-                {userRemaningAmount > 0?<div className='flex items-center gap-2'>
+                {userRemaningAmount > 0 ? <div className='flex items-center gap-2'>
                   <span className="text-2xl font-bold text-emerald-600">{'+ '}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
-               <TrendingUp size={18} className="text-emerald-500" />
-                </div>:<div className='flex items-center gap-2'><span className="text-2xl font-bold text-red-700">{''}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
-               <TrendingDown size={18} className="text-red-500" /></div>}
+                  <TrendingUp size={18} className="text-emerald-500" />
+                </div> : <div className='flex items-center gap-2'><span className="text-2xl font-bold text-red-700">{''}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
+                  <TrendingDown size={18} className="text-red-500" /></div>}
               </div>
             </div>
           </div>
@@ -226,6 +313,8 @@ export default function TripDetailsPage() {
             <span>Add Expense</span>
           </button>
         </div>
+        
+
         {/* Members list */}
         <div className="space-y-4">
           <div className="flex justify-between pr-6 items-center">
@@ -243,16 +332,19 @@ export default function TripDetailsPage() {
                   (m) => m.name.trim().toLowerCase() === member.name?.trim().toLowerCase()
                 );
                 const amount = memberData?.remainingAmount || 0;
-                const spend  = memberData?.totalPaid;
+                const spend = memberData?.totalPaid;
+                const name = String(memberData?.name);
+                const isSelected = String(memberData?.name) === selected;
 
                 return (
-                  <div key={index} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                  <div onClick={()=>toggelButton(name)}>
+                    <div key={index} className="flex items-center justify-between my-3 first:pt-0 last:pb-0">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
                         {member.name.substring(0, 2).toUpperCase()}
                       </div>
                       <span className="text-sm font-medium text-slate-800">{member.name}</span>
-                      {session?.user?.name !== member.name ?<span className='text-sm text-slate-400'>( PAID : {spend} )</span>:null}
+                      {session?.user?.name !== member.name ? <span className='text-sm text-slate-400'>( PAID : {spend} )</span> : null}
                     </div>
 
                     {/* Formatted Remaining Amount (+ / -) */}
@@ -274,8 +366,22 @@ export default function TripDetailsPage() {
                       )}
                     </div>
                   </div>
+                  <div className={`${isSelected?'flex':'hidden'} items-center pl-12 text-slate-500 pb-1`}>role : 
+                      {member.role !== 'creator'?UserRole==='creator'?
+                      <select 
+                      value={member.role?.toLowerCase()}
+                      onChange={(e) => handleRoleChange(String(member.email), e.target.value)}
+                      className="w-fit px-0.5 ml-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value='member'>Member</option>
+                        <option value='admin'>Admin</option>
+                      </select>
+                      :<span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span>:<span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span>}
+                      
+                  </div>
+                  </div>
                 );
               })}
+              <div className='mt-2 w-full'><p className='text-slate-400/80 items-center justify-center flex text-sm font-lightbold'>Only Admins are able to add and delete expenses.</p></div>
             </div>
           ) : (
             <div className="flex items-center h-20 bg-teal-100/50 rounded-2xl m-6 text-bold text-teal-800 justify-center">
@@ -293,9 +399,13 @@ export default function TripDetailsPage() {
             <span className="text-xs text-slate-400 font-medium">{expenses.length} activities</span>
           </div>
           <div className="space-y-3">
-            {expenses?.map((expense) => (
+            {expenses?.map((expense) => {
+              const expenseId = String(expense._id);
+              const isSelected = selected === expenseId;
+              return(
               <div
-                key={expense.id}
+                onClick={() => toggelButton(expenseId)}
+                key={expenseId}
                 className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
@@ -319,14 +429,63 @@ export default function TripDetailsPage() {
                   <p className="text-[11px] text-slate-400 mt-0.5">
                     Share: {trip?.currency} {(expense.amount / (trip?.members?.length || 1)).toFixed(0)} / person
                   </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents parent card click from toggling state
+                      handleDeleteExpense(String(expense._id));
+                    }}
+                    className={`${isSelected ? 'flex' : 'hidden'} items-center text-slate-400 text-sm ml-5 mt-1 bg-red-50 p-1 px-2 rounded-2xl place-self-end hover:bg-red-200 hover:text-red-500`}>
+                    Delete
+                  </button>
                 </div>
-              </div>
-            ))}
+              </div>)
+})}
           </div>
         </div>
         <div className={`${expenses.length === 0 ? 'flex' : 'hidden'} rounded-2xl mx-5 mt-10 bg-teal-50 items-center justify-center p-4`}>
           <p className='text-teal-800 '>No Expanses added yet..</p>
         </div>
+
+        {/*Deleted Expenses*/}
+
+        <div className={`${deletedExpenses.length === 0?'hidden':'block'} lg:col-span-2 mt-18 space-y-4`}>
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center space-x-2">
+              <Trash2 size={18} className="text-emerald-600" />
+              <h2 className="text-lg font-bold text-slate-900">Deleted Expenses</h2>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">{deletedExpenses.length} activities</span>
+          </div>
+          <div className="space-y-3">
+            {deletedExpenses?.map((expense) => (
+              <div
+                key={expense.id}
+                className="bg-red-50/50 border border-red-200 hover:border-red-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-red-50 border border-red-150 rounded-xl flex items-center justify-center text-red-300 group-hover:text-red-600 group-hover:bg-red-50 transition-colors">
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                      {expense.description}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Removed By <span className="text-slate-700 font-medium">{expense.payer}</span> • {format(new Date(expense.date).toLocaleDateString(), 'dd MMM yyyy')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-sm font-bold text-slate-950">
+                    {trip?.currency} {expense.amount}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </main>}
     </div>
   );

@@ -8,6 +8,7 @@ export interface ITrip extends Document {
   members: {
     name: string;
     email?: string;
+    role:string;
     userId?: Types.ObjectId;
     _id?: Types.ObjectId;
   }[];
@@ -23,6 +24,7 @@ const TripSchema = new Schema<ITrip>({
     {
       name: { type: String, required: true },
       email: { type: String },
+      role: { type: String, default: 'member'},
       userId: { type: Schema.Types.ObjectId, ref: 'User' },
     },
   ],
