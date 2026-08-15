@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           role:'member'
         }));
 
-        const allMembers = [creator,...otherMembers.filter((m:any)=>m.email!==session?.user?.email)]
+        const allMembers = [creator,...otherMembers.filter((m:(typeof trip.members))=>m.email!==session?.user?.email)]
 
         const trip = new Trip({
           name,
@@ -74,13 +74,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({error:'Trip not found'});
       }
 
-      const requestingUser = trip.members.find((m:any)=>m.email?.toLowerCase()===session.user?.email?.toLocaleLowerCase());
+      const requestingUser = trip.members.find((m:(typeof trip.members))=>m.email?.toLowerCase()===session.user?.email?.toLocaleLowerCase());
 
       if(!requestingUser || requestingUser.role !== 'creator'){
         return res.status(403).json({ error: 'Only the trip creator can assign roles' });
       }
 
-      const targetMember = trip.members.find((m:any)=>m.email.toLowerCase()===email.toLocaleLowerCase());
+      const targetMember = trip.members.find((m:(typeof trip.members))=>m.email.toLowerCase()===email.toLocaleLowerCase());
       if(!targetMember){
         return res.status(404).json({error:'Member not found'});
       }

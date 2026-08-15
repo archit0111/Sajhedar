@@ -70,7 +70,7 @@ export default function TripDetailsPage() {
   }, [session, id])
 
   const roleOfUser=(trip:ITrip)=>{
-    const user = trip.members.find((m:any)=>m.email===session?.user?.email);
+    const user = trip.members.find((m)=>m.email===session?.user?.email);
     const userRole = String(user?.role);
     setUserRole(userRole);
   }
@@ -188,7 +188,7 @@ export default function TripDetailsPage() {
           setDeletedExpenses(data);
         }
       }catch(e){
-        console.error("Error in fetching deleted expenses!");
+        console.error("Error in fetching deleted expenses!",e);
       }
     }
     fetchDeletedExpense();
@@ -211,15 +211,15 @@ export default function TripDetailsPage() {
       if(!res.ok){
         throw new Error(data.error || 'Failed tp update role');
       }
-      setTrip((prev:any)=>{
+      setTrip((prev)=>{
         if(!prev) return prev;
         return{
           ...prev,
-          members:prev.members.map((m:any)=>m.email === email?{...m,role:newRole}:m)
-        }
+          members:prev.members.map((m)=>m.email === email?{...m,role:newRole}:m)
+        }as ITrip
       })
     }catch(e){
-      alert('Could not update role!');
+      console.log('Could not update role!',e);
     }
   }
 
@@ -337,8 +337,8 @@ export default function TripDetailsPage() {
                 const isSelected = String(memberData?.name) === selected;
 
                 return (
-                  <div onClick={()=>toggelButton(name)}>
-                    <div key={index} className="flex items-center justify-between my-3 first:pt-0 last:pb-0">
+                  <div key={index} onClick={()=>toggelButton(name)}>
+                    <div className="flex items-center justify-between my-3 first:pt-0 last:pb-0">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
                         {member.name.substring(0, 2).toUpperCase()}

@@ -6,27 +6,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
         return res.status(405).json({error:'Method not allowed'});
     }
     try{
-        const {name,email,subject,tripName='NewTrip',inviterName='creator',password=''} = req.body;
-
-        // const {data,error}=await resend.emails.send({
-        //     from: 'TripApp <onboarding@resend.dev>',
-        //     to: process.env.NODE_ENV === 'development' ? 'sarchit0111@gmail.com' : email,
-        //     subject:subject,
-        //     html:`
-        //     <div style='font-family: sans-serif; padding:20px;'>
-        //     <h2>Hey ${name}! 👋</h2>
-        //     <p>Cogratulations🥳 you have successfully signup. Welcome to the our platform <strong>SAJHEDAR</strong> and thamks a lot for joining us.</p>
-        //     <p><strong>Your email:</strong> ${email}</p>
-        //     <p><strong>Your Password:</strong> ${password}</p>
-        //     <p style='padding-top:20px'></p>
-        //     <p>Thankyou 😊</p>
-        //     </div>
-        //     `
-        // });
-
-        // if(error){
-        //     return res.status(400).json({error});
-        // }
+        const {name,email,subject,password=''} = req.body;
 
         const transporter = nodemailer.createTransport({
             service:'gmail',

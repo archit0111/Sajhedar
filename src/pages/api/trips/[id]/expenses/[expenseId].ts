@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (req.method === 'DELETE') {
       try {
         const trip = await  Trip.findById(id);
-        const userRequesting = trip.members.find((m:any)=>m.email?.toLowerCase()===session?.user?.email?.toLocaleLowerCase());
+        const userRequesting = trip.members.find((m:(typeof trip.members))=>m.email?.toLowerCase()===session?.user?.email?.toLocaleLowerCase());
         if(userRequesting.role ==='creator' || userRequesting.role ==='admin'){
           const deletedExpense = await Expense.findOneAndDelete({
             _id: expenseId,
