@@ -103,7 +103,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!user) {
           return res.status(404).json({ error: 'User not found' });
         }
-        const trips = await Trip.find({ createdBy: user._id })
+        const trips = await Trip.find({ 
+          $or:[
+            {createdBy: user._id},
+            {'members.email' : user?.email}
+          ]
+         })
           .sort({ createdAt: -1 })
           .lean();
 

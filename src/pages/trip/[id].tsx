@@ -381,7 +381,7 @@ export default function TripDetailsPage() {
                   </div>
                 );
               })}
-              <div className='mt-2 w-full'><p className='text-slate-400/80 items-center justify-center flex text-sm font-lightbold'>Only Admins are able to add and delete expenses.</p></div>
+              <div className='mt-2 w-full'><p className='text-slate-400/80 items-center justify-center flex text-sm font-lightbold'>Only Admins are able to delete expenses.</p></div>
             </div>
           ) : (
             <div className="flex items-center h-20 bg-teal-100/50 rounded-2xl m-6 text-bold text-teal-800 justify-center">

@@ -63,7 +63,9 @@ export default function Signup(){
       setStatus({
         type:"success",
         message:"Account created! Redirecting to login..."
-      })
+      });
+      handelSendEmail();
+      router.push('/login');
 
     }catch(e){
       setStatus({
@@ -72,6 +74,26 @@ export default function Signup(){
       })
     }finally{
       setLoading(false);
+    }
+  }
+
+  const handelSendEmail = async ()=>{
+    try{
+      const res = await fetch('/api/send_email',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          name:name,
+          email:email,
+          password:password,
+          subject:"Welcome from Sajhedar and team."
+        })
+      });
+      if(res.ok){
+        console.log("Welcome email sent successfully!");
+      }
+    }catch(e){
+      console.error('Error in sending welcome mail!',e);
     }
   }
 
