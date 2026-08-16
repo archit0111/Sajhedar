@@ -10,8 +10,8 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
     const {name, email, password}= req.body;
     console.log(email);
     
-    console.log(password);
-    console.log(name);
+    // console.log(password);
+    // console.log(name);
     if(!name || !email || !password){
         return res.status(400).json({messsage:"All fields are reqired"});
     }

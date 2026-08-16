@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import Trip from '@/models/Trip';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
+import nodemailer from 'nodemailer'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -20,13 +21,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { name, startDate, endDate, currency, members } = req.body;
 
         if (!name || !startDate || !currency || !members) {
-          console.log(req.body)
+          // console.log(req.body)
           return res.status(400).json({ error: 'Missing required fields' });
         }
 
         // Find the user by email to get their ObjectId
-        console.log(session.user?.email);
-        console.log(session);
+        // console.log(session.user?.email);
+        // console.log(session);
         const user = await User.findOne({
           email: { $regex: new RegExp(`^${session?.user?.email?.toLowerCase()}$`, 'i') }
         });
@@ -46,8 +47,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           role:'member'
         }));
 
-        const allMembers = [creator,...otherMembers.filter((m:(typeof trip.members))=>m.email!==session?.user?.email)]
+        const transporter = nodemailer.createTransport({
+          service:"gmail",
+          auth:{
+            user:process.env.SMTP_USER,
+            pass:process.env.SMTP_PASS
+          }
+        });
 
+        
+        const allMembers = [creator,...otherMembers.filter((m:(typeof trip.members))=>m.email!==session?.user?.email)]
+        
         const trip = new Trip({
           name,
           startDate,
@@ -56,8 +66,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           members:allMembers,
           createdBy: user._id,
         });
-
+        
         await trip.save();
+        //Sending Invie Email To All Members Of Trip
+
+        const emailsOfMembers:string[] = otherMembers.map((m: (typeof members))=>m.email);
+        
+        if(emailsOfMembers.length>0){
+          const emailPromises = emailsOfMembers.map((email:string)=>transporter.sendMail({
+            from:`Sajhedar <${process.env.SMTP_USER}`,
+            to:email,
+            subject:`You are added in a trip ${name}`,
+            html:`
+            <div style='font-family: Arial, sans-serif; padding :20px;'>
+            <h2>New Trip Invite!✈️</h2>
+            <p>Hi there,</p>
+            <p><strong>${session.user?.name}</strong> added you to the trip <strong> "${name}" </strong>.</p>
+            <p>Now please be ready to enjoy without doing calculations on spends of trip, we are here to handle that.</p>
+            <p style="padding:5px"></p>
+            <a 
+               href="${process.env.NEXT_PUBLIC_APP_URL}/"
+               target="_blank"
+               style="display: inline-block; padding: 10px 18px; color: #ffffff; background-color: #0d9488; text-decoration: none; border-radius: 6px; font-weight: bold;"
+             >
+               View Trip Details
+             </a>
+            <p style="padding:10px"></p>
+            <p>Thankyou😊</p>
+            </div>
+            `
+          }));
+
+          //Execute all mail dispatches concurrently
+          await Promise.allSettled(emailPromises);
+        }
         res.status(201).json(trip);
       } catch (error) {
         console.error('Error creating trip:', error);
