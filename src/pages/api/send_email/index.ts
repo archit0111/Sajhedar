@@ -27,7 +27,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
             <p><strong>Your email:</strong> ${email}</p>
             <p><strong>Your Password:</strong> ${password}</p>
             <p style='padding-top:20px'></p>
-            <p>Thankyou 😊</p>
+            <p>Thankyou😊 & Happy journey</p>
             </div>
             `
         });

@@ -21,7 +21,7 @@ export default function Signup(){
  const signInWithGoogle= async ()=>{
   try{
     //Trigger google OAuth
-    await signIn("google");
+    await signIn("google",{ callbackUrl: "/dashboard" });
   }catch(e){
     setStatus({
       type:"error",
@@ -56,7 +56,8 @@ export default function Signup(){
       if(!res.ok){
         if(res.status===422){
           alert("User Already Exist! Login Please..")
-          router.push('/login')
+          router.push('/login');
+          return;
         }
       }
 
@@ -66,6 +67,7 @@ export default function Signup(){
       });
       handelSendEmail();
       router.push('/login');
+      return;
 
     }catch(e){
       setStatus({

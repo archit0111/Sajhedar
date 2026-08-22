@@ -92,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                View Trip Details
              </a>
             <p style="padding:10px"></p>
-            <p>Thankyou😊</p>
+            <p>Thankyou😊 & Happy journey</p>
             </div>
             `
           }));

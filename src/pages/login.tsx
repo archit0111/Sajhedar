@@ -13,7 +13,7 @@ export default function Login(){
   const signInWithGoogle= async ()=>{
     try{
       //Trigger google OAuth
-      await signIn("google");
+      await signIn("google",{callbackUrl:'/dashboard'});
     }catch(e){
       const errorMessage = e instanceof Error ? e.message : "Failed to sign in with Google";
       setStatus({
@@ -65,6 +65,16 @@ export default function Login(){
     }
   }
 
+  // to handel reset password
+
+  const handleResetPassword = async ()=>{
+    try{
+      router.push('/forgotPassword');
+    }catch(e){
+      console.error(e);
+    }
+  }
+
   return(
     <div className="bg-slate-50 pt-10">
     <div className="flex justify-between pt-3 lg:mx-5 mx-4 bg-teal-600 items-center p-2 pl-4 rounded-2xl">
@@ -104,6 +114,11 @@ export default function Login(){
             placeholder="Enter your password"
             className="p-1 px-1 border rounded-sm mt-1"
             onChange={(e)=>setPassword(e.target.value)}/>
+            <div className="flex justify-end">
+              <p 
+              onClick={handleResetPassword}
+              className="text-sm font-extralight hover:text-blue-500 focus:scale-95">Forgot Password?</p>
+            </div>
           </div>
           <div className="text-center">
             <button type="submit" className={`bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>{loading?"Please wait..":"Login"}</button>
