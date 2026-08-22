@@ -71,7 +71,7 @@ export default function Login(){
     try{
       router.push('/forgotPassword');
     }catch(e){
-      
+      console.error(e);
     }
   }
 
