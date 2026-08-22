@@ -13,7 +13,7 @@ export default function Login(){
   const signInWithGoogle= async ()=>{
     try{
       //Trigger google OAuth
-      await signIn("google");
+      await signIn("google",{callbackUrl:'/dashboard'});
     }catch(e){
       const errorMessage = e instanceof Error ? e.message : "Failed to sign in with Google";
       setStatus({
@@ -69,7 +69,7 @@ export default function Login(){
 
   const handleResetPassword = async ()=>{
     try{
-
+      router.push('/forgotPassword');
     }catch(e){
       
     }

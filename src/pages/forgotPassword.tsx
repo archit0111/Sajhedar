@@ -11,13 +11,26 @@ export default function ForgotPassword(){
 
     const handelSentResetEmail = async (e:React.FormEvent)=>{
         e.preventDefault();
+        setLoading(true);
         if(email===''){
             setError('Enter your registered email..');
+            setLoading(false);
+            return;
         }
         try{
-            // const fetchUser = await fetch('/api/user');
+            const res = await fetch('/api/forgotPassword',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({email})
+            });
+            if(!res.ok){
+                alert("Somthing went wrong!");
+            }
+            setEmailSent(true);
         }catch(e){
             alert(e);
+        }finally{
+            setLoading(false);
         }
 
     }
@@ -30,7 +43,7 @@ export default function ForgotPassword(){
         </div>
         <div className="h-fit w-auto justify-center flex">
             {!emailSent?
-            <div className="h-fit p-4 mt-40 bg-teal-100 rounded-2xl items-center justify-center w-[55%] self-center">
+            <div className="h-fit p-12 mt-40 bg-teal-100 rounded-2xl items-center justify-center w-[55%] self-center">
                 <h2 className="font-bold text-center text-xl">Enter Your Registered Email</h2>
                 {error!==''?
                 <div className="flex justify-center place-self-center mt-4 rounded-2xl p-4 bg-red-400 w-[50%]">{error}
@@ -38,10 +51,11 @@ export default function ForgotPassword(){
                 <input type="email"
                  required
                  placeholder="example.gmail.com"
-                className="border rounded-2xl p-1 px-2 text-center w-fit flex mt-5 place-self-center focus:border-blue-600"/>
+                onChange={(e)=>setEmail(e.target.value)}
+                className="border rounded-2xl p-1 px-4 text-center w-fit flex mt-5 place-self-center focus:border-blue-600"/>
                 <div className="mt-2 text-center text-sm font-extralight">
                     <button className="p-2 bg-teal-600 px-8 rounded-2xl text-white my-5 w-[85%] hover:bg-blue-600 focus:scale-95 cursor-pointer"
-                    onClick={(e)=>handelSentResetEmail(e)}>Send Reset Link</button>
+                    onClick={(e)=>handelSentResetEmail(e)}>{loading?"Please wait...":"Send Reset Link"}</button>
                     <p>New User? <span className="font-bold text-teal-800 hover:text-blue-700 focus:scale-95"
                     onClick={()=>router.push('/signup')}>SignUp</span></p>
                 </div>
