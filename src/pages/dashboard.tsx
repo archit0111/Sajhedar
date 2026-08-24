@@ -47,7 +47,7 @@ export default function Dashboard() {
       if (!session) return;
 
       try {
-        const res = await fetch('/api/trips');
+        const res = await fetch(`/api/trips?t=${Date.now()}`);
 
         if (!res.ok) {
           throw new Error('Failed to fetch trips');
@@ -60,7 +60,7 @@ export default function Dashboard() {
       }
     }
     fetchUserTrips();
-  }, [session, status]);
+  }, [session?.user?.email, status]);
 
   if (status === 'loading') {
     return (

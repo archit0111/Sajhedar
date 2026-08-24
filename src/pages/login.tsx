@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 
 export default function Login(){
   const [email,setEmail]=useState('');
@@ -12,6 +12,7 @@ export default function Login(){
 
   const signInWithGoogle= async ()=>{
     try{
+      await signOut({ redirect: false });
       //Trigger google OAuth
       await signIn("google",{callbackUrl:'/dashboard'});
     }catch(e){
@@ -25,6 +26,7 @@ export default function Login(){
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault();
+    setError(false);
     setStatus({ type: "", message: "" });
     if (!email || !password) {
       setError(true);
@@ -43,8 +45,9 @@ export default function Login(){
       if (res?.error) {
         setStatus({
           type: "error",
-          message: "Invalid credentials. Please try agian..",
+          message: res.error,
         });
+        setError(true);
       } else {
         setStatus({
           type: "success",

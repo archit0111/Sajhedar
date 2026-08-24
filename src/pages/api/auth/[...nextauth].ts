@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import clientPromise from '@/lib/mongodb';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
@@ -24,6 +23,7 @@ export default NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -39,14 +39,23 @@ export default NextAuth({
         const db = client.db('Sajhedar');
 
         const user = await db.collection('users').findOne({email:credentials.email});
+        
+        if(!user){
+          throw new Error('No user found with these credentials.');
+        }
 
+        if (!user?.password || user?.provider === "google") {
+           throw new Error(
+            "This account was created using Google. Please sign in with Google."
+          );
+        }
         if(!user || !user.password){
           throw new Error('No user found with this email...');
         }
 
         const isValid = await bcrypt.compare(credentials.password,user.password);
         if(!isValid){
-          throw Error('Invalid password.')
+          throw Error('Invalid credentials. Please try again.')
         }
 
         return {
@@ -57,12 +66,52 @@ export default NextAuth({
       }
     })
   ],
-  adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
   },
+  callbacks: {
+    async signIn({user,account}){
+      if(account?.provider === 'google'){
+        const client = await clientPromise;
+        const db=client.db('Sajhedar');
+
+        const existingUser = await db.collection('users').findOne({email:user.email});
+        if(!existingUser){
+          const newUser = await db.collection('users').insertOne({
+            name:user.name,
+            email:user.email,
+            image:user.image,
+            provider:'google',
+            createdAt:new Date()
+          });
+          user.id = newUser.insertedId.toString();
+        }else{
+          user.id=existingUser._id.toString();
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }else if(token.email && !token.id){
+        const client = await clientPromise;
+        const db = client.db('Sajhedar');
+        const dbUser = await db.collection('users').findOne({email:token.email});
+        if(dbUser) token.id = dbUser._id.toString();
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session?.user && token?.id) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
   pages: {
-    signIn: '/dashboard',
+    signIn: '/login',
+    error:'/login'
   },
   debug: process.env.NODE_ENV === 'development',
 });
