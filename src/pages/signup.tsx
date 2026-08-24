@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 
 interface StatusState {
   type?: "success" | "error" | "";
@@ -20,6 +20,7 @@ export default function Signup(){
 
  const signInWithGoogle= async ()=>{
   try{
+    await signOut({ redirect: false });
     //Trigger google OAuth
     await signIn("google",{ callbackUrl: "/dashboard" });
   }catch(e){
