@@ -15,6 +15,8 @@ export default function Signup(){
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState(false);
   const router = useRouter();
+  const [otpSent,setOtpSent]=useState(false);
+  const [otp,setOtp]=useState('');
 
 
 
@@ -47,12 +49,28 @@ export default function Signup(){
       return setStatus({type:'error',message:"Password must be of 6 characters"})
     }
     setLoading(true);
-    
+
+    //for otp verification
+
+    const sent = await sendOtp();
+
+    if(!sent){
+      setStatus({
+        type:"error",
+        message:"Otp not sent. Please try again."
+      })
+      return;
+    }
+    setOtpSent(true);
+    return;
+  }
+
+  const signUp = async ()=>{
     try{
       const res = await fetch('api/auth/signup',{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({name,email,password})
+        body:JSON.stringify({name,email,password,otp})
       })
       if(!res.ok){
         if(res.status===422){
@@ -77,6 +95,31 @@ export default function Signup(){
       })
     }finally{
       setLoading(false);
+    }
+  }
+
+  const sendOtp = async ()=>{
+    try{
+      const res = await fetch('/api/auth/send-otp',{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email:email})
+      });
+
+      if(!res.ok){
+        setStatus({
+        type:"error",
+        message:"Otp not sent. Please try again."
+      });
+      return false;
+      }
+      return true;
+      
+    }catch(e){
+      setStatus({
+        type:"error",
+        message:e instanceof Error ?e.message : "Something went wrong. Please try again."
+      })
     }
   }
 
@@ -143,8 +186,23 @@ export default function Signup(){
             className="p-1 px-1 border rounded-sm mt-1"
             onChange={(e)=>setPassword(e.target.value)}/>
           </div>
+          {otpSent?<div className="pb-4 flex flex-col">
+            <div>
+              <label htmlFor="otp"className="font-medium text-teal-800">Enter OTP</label>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500 pl-1">Enter OTP sent to your email.</p>
+            </div>
+            <input type="otp"
+            placeholder="Enter your OTP"
+            className="p-1 px-1 border rounded-sm mt-1"
+            onChange={(e)=>setOtp(e.target.value)}/>
+          </div>:null}
           <div className="text-center">
-            <button type="submit" className={`bg-green-400 ${loading?"cursor-not-allowed":""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading?"Please wait..":"SignUp"}</button>
+            {!otpSent?<button type="submit" className={`bg-green-400 ${loading?"cursor-not-allowed":""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading?"Please wait..":"SignUp"}</button>:
+            <button
+            onClick={()=>signUp()}
+            className={`bg-green-400 ${loading?"cursor-not-allowed":""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading?"Please wait..":"Verify OTP"}</button>}
             <p className="font-extralight text-medium">Already have account?<span onClick={()=>router.push('/login')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Login</span></p>
           </div>
         </form>
