@@ -68,7 +68,10 @@ export default function ForgotPassword(){
                     <p>Please click on link to reset your password</p>
                 </div>
                 <div className="mt-2 text-center text-sm font-extralight">
-                    <button className="p-2 bg-teal-600 px-8 rounded-2xl text-white my-5 w-[85%] hover:bg-blue-600 focus:scale-95 cursor-pointer">Login</button>
+                    <button
+                     type="button"
+                     onClick={()=>router.push('/login')}
+                     className="p-2 bg-teal-600 px-8 rounded-2xl text-white my-5 w-[85%] hover:bg-blue-600 focus:scale-95 cursor-pointer">Login</button>
                     <p>Reset link not recived? <span className="font-bold text-teal-800 hover:text-blue-700 focus:scale-95">Resend</span></p>
                 </div>
             </div>}
