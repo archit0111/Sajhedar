@@ -30,7 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         const trip = await Trip.findOne({ 
           _id: id,
-          'members.name': user.name
+          $or: [
+            { 'members.email': session.user.email },
+            { 'members.userId': user._id },
+            { createdBy: user._id }
+          ]
         }).lean();
 
         if (!trip) {
