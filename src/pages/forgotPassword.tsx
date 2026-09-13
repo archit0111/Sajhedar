@@ -43,7 +43,7 @@ export default function ForgotPassword(){
         </div>
         <div className="h-fit w-auto justify-center flex">
             {!emailSent?
-            <div className="h-fit p-12 mt-40 bg-teal-100 rounded-2xl items-center justify-center w-[55%] self-center">
+            <div className="h-fit p-12 mt-40 bg-teal-100 rounded-2xl items-center justify-center w-[80%] sm:w-[55%] self-center">
                 <h2 className="font-bold text-center text-xl">Enter Your Registered Email</h2>
                 {error!==''?
                 <div className="flex justify-center place-self-center mt-4 rounded-2xl p-4 bg-red-400 w-[50%]">{error}
