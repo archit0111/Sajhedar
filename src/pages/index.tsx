@@ -3,6 +3,7 @@ import Nav from "@/components/Nav";
 import { ArrowRight, DollarSign, ShieldCheck, Users, Zap} from "lucide-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home(){
 
@@ -63,7 +64,7 @@ export default function Home(){
     </div>
     {/*Picture Section*/}
     <div className="justify-center flex">
-      <img src="heroSectionPic.png" alt="hero_sec_pic" />
+      <img src="heroSectionPic.png" alt="hero_sec_pic"  />
     </div>
     <div className="p-4 py-6 justify-self-center lg:max-w-[70%] m-4 border border-slate-200 rounded-xl text-center mb-5 items-center">
       <p className="mt-4 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
