@@ -270,7 +270,7 @@ export default function TripDetailsPage() {
             <div className="flex flex-wrap gap-3 text-sm text-slate-600 pt-1">
               <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
                 <Calendar size={16} className="text-emerald-600" />
-                <span>{trip?.startDate ? format(new Date(trip?.startDate).toLocaleDateString(), 'dd MMM yyyy') : 'N/A'}</span>
+                <span>{trip?.startDate ? format(new Date(trip?.startDate), 'dd MMM yyyy') : 'N/A'}</span>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
                 <Coins size={16} className="text-amber-500" />
