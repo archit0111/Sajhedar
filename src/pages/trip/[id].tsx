@@ -417,7 +417,7 @@ export default function TripDetailsPage() {
                       {expense.description}
                     </h4>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Paid by <span className="text-slate-700 font-medium">{expense.payer}</span> • {format(new Date(expense.date).toLocaleDateString(), 'dd MMM yyyy')}
+                      Paid by <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -471,7 +471,7 @@ export default function TripDetailsPage() {
                       {expense.description}
                     </h4>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Removed By <span className="text-slate-700 font-medium">{expense.payer}</span> • {format(new Date(expense.date).toLocaleDateString(), 'dd MMM yyyy')}
+                      Removed By <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
                     </p>
                   </div>
                 </div>
