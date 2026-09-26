@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [trips, setTrips] = useState<ClientTrip[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
+  const [loading,setLoading]=useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -45,7 +46,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUserTrips = async () => {
       if (!session) return;
-
+      setLoading(true);
       try {
         const res = await fetch(`/api/trips?t=${Date.now()}`);
 
@@ -57,6 +58,8 @@ export default function Dashboard() {
         
       } catch (e) {
         console.log(e);
+      }finally{
+        setLoading(false);
       }
     }
     fetchUserTrips();
@@ -102,24 +105,32 @@ export default function Dashboard() {
       </div>
       <div className="m-5 mt-25 grow">
         <div className='justify-center flex'>
-          <p className='font-bold text-center text-teal-800 text-3xl md:text-4xl'>
+          <p className='font-bold text-center text-3xl md:text-4xl'>
             Welcome, {session.user?.name}! Start your Trip today with us
           </p>
         </div>
+        <div className='justify-center flex mt-4'>
+          <p className='text-center text-sm md:text-lg text-slate-500'>
+            Plan and enjoy your trip without any stress.
+          </p>
+        </div>
         <div className='flex justify-center mt-15'>
-          <button className='p-4 font-bold text-slate-50 rounded-2xl cursor-pointer flex bg-teal-400 hover:bg-green-500'
+          <button className='p-4 font-bold text-slate-50 rounded-2xl cursor-pointer flex bg-emerald-600 hover:scale-110 transition-all focus:scale-95'
             onClick={() => setIsOpen(prev => !prev)}>
             <Plus className='text-white pr-1' /> Start New Trip
           </button>
         </div>
         <div className="mt-20">
-          <h3 className='pl-2 font-bold text-2xl text-teal-800'>Your Trips</h3>
+          <h3 className='pl-2 font-bold text-2xl'>Your Trips</h3>
         </div>
-        {trips.length === 0 ? (
-          <div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
+        {trips.length === 0 ?
+          (loading?(<div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
+            Loading trips...
+          </div>)
+          :<div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
             No trips present...
-          </div>
-        ) : (
+          </div>)
+        : (
           <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
             {trips.toReversed().map((trip: ClientTrip) => (
               <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
