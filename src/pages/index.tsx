@@ -3,7 +3,6 @@ import Nav from "@/components/Nav";
 import { ArrowRight, DollarSign, ShieldCheck, Users, Zap} from "lucide-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function Home(){
 
