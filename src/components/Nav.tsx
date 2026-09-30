@@ -13,10 +13,10 @@ export default function Nav(){
         Sajhedar
       </div>   
       <div className="md:flex hidden justify-end gap-[10%] w-[40%]">
-        <Link href={'/'} className="font-semibold hover:text-amber-700">Home</Link>
-        <Link href={'/trips'} className="font-semibold hover:text-amber-700">Trips</Link>
-        <Link href={'/feedback'} className="font-semibold hover:text-amber-700">Feedback</Link>
-        <Link href={'/account'} className="font-semibold hover:text-amber-700">Account</Link>
+        <Link href={'/dashboard'} className="font-semibold hover:text-amber-700">Home</Link>
+        <Link href={'#trips'} className="font-semibold hover:text-amber-700">Trips</Link>
+        <Link href={'/about-us'} className="font-semibold hover:text-amber-700">About Us</Link>
+        <Link href={'/profile'} className="font-semibold hover:text-amber-700">Account</Link>
       </div>
       <div className="md:hidden font-bold text-3xl hover:cursor-pointer"
       onClick={()=>setList(prev=>!prev)}>
@@ -24,10 +24,10 @@ export default function Nav(){
       </div>
     </div>
     <div className={`${list?'grid':'hidden'} grid-cols-1 absolute right-8 top-26 text-center p-4 bg-teal-100/70 rounded-lg`}>
-      <Link href={'/'} className="text-lg font-semibold border-b-1 hover:text-amber-700">Home</Link>
+      <Link href={'/dashboard'} className="text-lg font-semibold border-b-1 hover:text-amber-700">Home</Link>
       <Link href={'/trips'} className="text-lg font-semibold border-b-1 hover:text-amber-700">Trips</Link>
-      <Link href={'/feedback'} className="text-lg font-semibold border-b-1 hover:text-amber-700">Feedback</Link>
-      <Link href={'/account'} className="text-lg font-semibold hover:text-amber-700">Account</Link>
+      <Link href={'/about-us'} className="text-lg font-semibold border-b-1 hover:text-amber-700">About Us</Link>
+      <Link href={'/profile'} className="text-lg font-semibold hover:text-amber-700">Account</Link>
     </div>
     </>
   )

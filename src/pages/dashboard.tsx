@@ -121,7 +121,9 @@ export default function Dashboard() {
           </button>
         </div>
         <div className="mt-20">
-          <h3 className='pl-2 font-bold text-2xl'>Your Trips</h3>
+          <h3
+          id='trips' 
+          className='pl-2 font-bold text-2xl'>Your Trips</h3>
         </div>
         {trips.length === 0 ?
           (loading?(<div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
