@@ -71,7 +71,7 @@ export default function AboutUs() {
               Why we built Sajhedar
             </h2>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              We've all been there and know that a great group trip ends with lot of beautiful memories, but it's followed by chaotic WhatsApp threads, lost paper receipts, and awkward calculations over who paid for dinner vs. hotel.
+              We&apos;ve all been there and know that a great group trip ends with lot of beautiful memories, but it&apos;s followed by chaotic WhatsApp threads, lost paper receipts, and awkward calculations over who paid for dinner vs. hotel.
             </p>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
               We created <span className='font-bold'>Sajhedar</span> (meaning <em>Partner/Collaborator</em>) as an intuitive companion to keep group finances crystal clear, transparent, and effortlessly balanced in real-time.
