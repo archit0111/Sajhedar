@@ -8,7 +8,6 @@ import {
   Receipt, 
   Globe2, 
   ShieldCheck, 
-  Sparkles, 
   ArrowRight,
   HeartHandshake
 } from 'lucide-react';
@@ -41,14 +40,12 @@ export default function AboutUs() {
     <div className="bg-slate-50/60 text-slate-800 ">
       {/* Navigation */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
-        <div className=" px-4 sm:px-6 lg:px-8 py-2">
+        <div className="px-10 md:px-15 py-5 sm:px-6 lg:px-8">
           <Nav />
         </div>
       </header>
 
       <main className="grow w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        
-        {/* Hero Section */}
         <section>
           <div className='flex justify-center'>
           <div className="font-extrabold flex items-center place-self-center text-white bg-amber-600 rounded-full m-1 text-4xl h-18 p-6.5">S</div>
@@ -56,17 +53,17 @@ export default function AboutUs() {
           <div className='flex justify-center'>
             <div className='text-4xl justify-center font-bold'>Sajhedar</div>
           </div>
-          <div className='justify-center flex'>
+          <div className='flex justify-center'>
             <p>Making group travel memories, not money conflicts.</p>
           </div>
-          <div className='p-10'>
+          <div className='p-10 justify-center flex'>
             <div className="bg-white border text-slate-500 border-slate-200/80 rounded-2xl p-8 shadow-sm hover:shadow-md mt-5 justify-center">
             Sajhedar was built to eliminate the stress of calculating shared expenses, splitting bills, and chasing IOUs after vacations—so you can focus on the adventure.
           </div>
           </div>
         </section>
 
-        {/* Origin Story / Mission */}
+        {/* Mission */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <span className="text-2xl font-bold uppercase tracking-wider text-teal-700">Our Mission</span>
