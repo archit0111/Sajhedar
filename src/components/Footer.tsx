@@ -22,7 +22,7 @@ export default function Footer() {
             <span className="font-semibold text-teal-500 mb-1">Product</span>
             <Link href="/" className="hover:text-orange-300 transition-colors">Home</Link>
             <Link href="/feedback" className="hover:text-orange-300 transition-colors">Feedback</Link>
-            <Link href="/About Us" className="hover:text-orange-300 transition-colors">About Us</Link>
+            <Link href="/about-us" className="hover:text-orange-300 transition-colors">About Us</Link>
           </div>
           <div className="flex flex-col gap-2">
             <span className="font-semibold text-teal-500 mb-1">Legal</span>
