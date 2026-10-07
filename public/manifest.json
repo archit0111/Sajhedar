@@ -1,0 +1,24 @@
+{
+    "id": "/",
+    "name": "Sajhedar - Trip Expense Manager",
+    "short_name": "Sajhedar",
+    "description": "Sajhedar was built to eliminate the stress of calculating and splitting shared expenses on trips so you can focus on the adventure.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0f172A",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
