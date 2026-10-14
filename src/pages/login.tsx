@@ -51,7 +51,7 @@ export default function Login(){
       } else {
         setStatus({
           type: "success",
-          message: "Login successful! Redirecting...",
+          message: "Login successfull! Redirecting...",
         });
 
         // Redirect to dashboard or homepage
