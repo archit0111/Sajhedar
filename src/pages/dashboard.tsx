@@ -39,7 +39,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push('/');
     }
   }, [router, status]);
 
