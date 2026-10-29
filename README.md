@@ -34,7 +34,7 @@ A comprehensive web application for managing and splitting group travel expenses
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd sajhedari-slip-expense
+cd sajhedar-trip-expense-manager
 ```
 
 2. Install dependencies:
@@ -97,13 +97,30 @@ src/
 3. **Add Expenses**: Record expenses with payer and split type
 4. **View Settlements**: See who owes whom and settle up
 
+## 📱 Install as a PWA (Mobile & Desktop)
+
+Sajhedar is fully optimized as a **Progressive Web App (PWA)**. You can install it on your device directly from the browser without downloading an external package file:
+
+### 📲 On Android (Chrome / Edge)
+1. Open [https://sajhedar.vercel.app](https://sajhedar.vercel.app) in Google Chrome.
+2. Tap the **three dots menu (⋮)** in the top-right corner.
+3. Select **Add to Home Screen** or **Install App**.
+4. Confirm by tapping **Install**.
+
+### 🍎 On iOS / iPhone (Safari)
+1. Open [https://sajhedar.vercel.app](https://sajhedar.vercel.app) in Safari.
+2. Tap the **Share button** (the square with an up arrow at the bottom).
+3. Scroll down and select **Add to Home Screen**.
+4. Tap **Add** in the top right corner.
+
+### 💻 On Desktop (Chrome / Edge / Brave)
+1. Visit [https://sajhedar.vercel.app](https://sajhedar.vercel.app) in your web browser.
+2. Look for the **Install icon** (a small monitor with a down arrow) in the browser address bar.
+3. Click **Install** to add Sajhedar directly to your computer applications.
+
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
