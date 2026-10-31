@@ -58,11 +58,11 @@ export default function Signup() {
 
     if (!sent) {
       setError(true);
-      if(status.message===""){
+      if (status.message === "") {
         setStatus({
-        type: "error",
-        message: "Otp not sent. Please try again."
-      });
+          type: "error",
+          message: "Otp not sent. Please try again."
+        });
       }
       setLoading(false);
       return;
@@ -229,22 +229,22 @@ export default function Signup() {
               {!otpSent ? <button
                 type="submit"
                 disabled={loading === true}
-                className={`bg-green-400 ${loading ? "cursor-not-allowed" : ""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading ? 
+                className={`bg-green-400 ${loading ? "cursor-not-allowed" : ""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading ?
                   <div className="flex items-center justify-center space-x-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
                     <span className="text-gray-700 font-medium">Loading...</span>
                   </div>
                   : "SignUp"}</button> :
                 <button
-                type="button"
+                  type="button"
                   onClick={() => signUp()}
                   disabled={loading === true}
-                  className={`bg-green-400 ${loading ? "cursor-not-allowed" : ""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>{loading ? 
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-                    <span className="text-gray-700 font-medium">Loading...</span>
-                  </div>
-                  : "Verify OTP"}</button>}
+                  className={`bg-green-400 ${loading ? "cursor-not-allowed" : ""} hover:bg-green-500 rounded-sm p-1 py-2 w-[40%] mt-8 my-5 focus:scale-95 transition-all sm:text-lg font-semibold text-white`}>
+                    {loading ?
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="h-7 w-7 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+                    </div>
+                    : "Verify OTP"}</button>}
               <p className="font-extralight text-medium">Already have account?<span onClick={() => router.push('/login')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Login</span></p>
             </div>
           </form>

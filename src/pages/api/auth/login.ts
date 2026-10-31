@@ -8,6 +8,7 @@ export default async function handler(req:NextApiRequest,res:NextApiResponse){
     }
 
     const {email,password}= req.body;
+    console.log("Login API called with email:", email); // Debugging line
 
     if(!email||!password){
         return res.status(400).json({message:"Email and password are required"});

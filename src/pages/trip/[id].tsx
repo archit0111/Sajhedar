@@ -389,6 +389,9 @@ export default function TripDetailsPage() {
             </div>
           )}
         </div>
+
+
+
         {/*Expenses List */}
         <div className="lg:col-span-2 mt-18 space-y-4">
           <div className="flex items-center justify-between px-1">
@@ -443,7 +446,7 @@ export default function TripDetailsPage() {
           </div>
         </div>
         <div className={`${expenses.length === 0 ? 'flex' : 'hidden'} rounded-2xl mx-5 mt-10 bg-teal-50 items-center justify-center p-4`}>
-          <p className='text-teal-800 '>No Expanses added yet..</p>
+          <p className='text-teal-800 '>Silence in the vault. Did someone buy coffee yet?</p>
         </div>
 
         {/*Deleted Expenses*/}

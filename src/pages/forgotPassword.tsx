@@ -65,7 +65,7 @@ export default function ForgotPassword(){
                     <p>Password reset link is send to your registered email id {email.substring(0,2)}*******gmail.com</p>
                 </div>
                 <div className="mt-5 text-center">
-                    <p>Please click on link to reset your password</p>
+                    <p>Please click on link and reset your password</p>
                 </div>
                 <div className="mt-2 text-center text-sm font-extralight">
                     <button
