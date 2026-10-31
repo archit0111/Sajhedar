@@ -67,7 +67,13 @@ export default function ResetPassword(){
                 className="border rounded-2xl p-1 px-4 text-center w-fit flex mt-5 place-self-center focus:border-blue-600"/>
                 <div className="mt-2 text-center text-sm font-extralight">
                     <button className="p-2 bg-teal-600 px-8 rounded-2xl text-white my-5 w-[85%] hover:bg-blue-600 focus:scale-95 cursor-pointer"
-                    onClick={(e)=>handelResetPassword(e)}>{loading?"Please wait...":"Reset Password"}</button>
+                    disabled={loading === true}
+                    onClick={(e)=>handelResetPassword(e)}>{loading?
+                        <div className="flex items-center justify-center space-x-2">
+                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+                            <span className="text-gray-700 font-medium">Loading...</span>
+                        </div>
+                    :"Reset Password"}</button>
                 </div>
             </div>:<div className="h-fit w-auto justify-center flex">
             <div className="h-fit p-4 mt-40 bg-teal-100 rounded-2xl items-center justify-center w-[55%] self-center">

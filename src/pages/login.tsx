@@ -120,11 +120,18 @@ export default function Login(){
             <div className="flex justify-end">
               <p 
               onClick={handleResetPassword}
-              className="text-sm font-extralight hover:text-blue-500 focus:scale-95">Forgot Password?</p>
+              className="text-sm font-extralight hover:text-blue-500 hover:cursor-pointer focus:scale-95">Forgot Password?</p>
             </div>
           </div>
           <div className="text-center">
-            <button type="submit" className={`bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>{loading?"Please wait..":"Login"}</button>
+            <button type="submit"
+            disabled={loading === true}
+             className={`bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>{loading?
+              <div className="flex items-center justify-center space-x-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+                <span className="text-gray-700 font-medium">Loading...</span>
+              </div>
+             :"Login"}</button>
             <p className="font-extralight text-medium">New User? <span onClick={()=>router.push('/signup')} className="hover:text-sm hover:cursor-pointer font-semibold text-blue-500">Signup</span></p>
           </div>
         </form>
