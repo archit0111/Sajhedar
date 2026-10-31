@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
 import {CreateTripForm} from '@/components/CreateTripModal';
+import SajhedarLoader from '@/components/SajhedarLoader';
 
 interface Member {
   name: string | null;
@@ -65,13 +66,17 @@ export default function Dashboard() {
     fetchUserTrips();
   }, [session?.user?.email, status]);
 
+
+  //For page loader while loading the page
+
   if (status === 'loading') {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <p className="text-xl font-bold text-teal-800">Loading your dashboard...</p>
-      </div>
+      <SajhedarLoader/>
     )
   }
+
+
+
 
   if (!session) {
     return null;
