@@ -126,7 +126,7 @@ export default function Login(){
           <div className="text-center">
             <button type="submit"
             disabled={loading === true}
-             className={`bg-green-400 hover:bg-green-500 h-8 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>
+             className={`bg-green-400 hover:bg-green-500 rounded-sm p-1 w-[40%] mt-8 mb-4 focus:scale-95 transition-all ${loading?"cursor-not-allowed":""}`}>
               {loading?
               <div className="flex items-center justify-center space-x-2">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />

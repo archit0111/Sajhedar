@@ -41,7 +41,7 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
     resolver: zodResolver(createTripSchema),
     defaultValues: initialData || {
       members: [{ name: '', email: '' , role:'member'}],
-      currency: 'USD',
+      currency: 'INR',
     },
   });
 
@@ -143,10 +143,10 @@ export default function CreateTripModal({ isOpen, onClose, onSubmit, initialData
               {...register('currency')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="INR">INR (₹)</option>
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
               <option value="GBP">GBP (£)</option>
-              <option value="INR">INR (₹)</option>
               <option value="CAD">CAD (C$)</option>
               <option value="AUD">AUD (A$)</option>
             </select>

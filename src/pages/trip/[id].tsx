@@ -19,6 +19,7 @@ import { ITrip } from '@/models/Trip';
 import AddExpanseModal from '@/components/AddExpanseModal';
 import { IExpense } from '@/models/Expense';
 import { IDeletedExpense } from '@/models/DeletedExpenses';
+import SajhedarLoader from '@/components/SajhedarLoader';
 
 interface IMembersWithRemainingAmount {
   id: string,
@@ -42,10 +43,10 @@ export default function TripDetailsPage() {
   const [membersRemainingAmount, setMembersRemaningAmount] = useState<IMembersWithRemainingAmount[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [deletedExpenses, setDeletedExpenses] = useState<IDeletedExpense[]>([]);
-  const [UserRole,setUserRole]=useState<string | null >('');
+  const [UserRole, setUserRole] = useState<string | null>('');
 
-  const toggelButton = (id:string)=>{
-    setSelected((prev)=>prev===id?null:id);
+  const toggelButton = (id: string) => {
+    setSelected((prev) => prev === id ? null : id);
   }
 
   useEffect(() => {
@@ -69,8 +70,8 @@ export default function TripDetailsPage() {
     fetchTrip();
   }, [session, id])
 
-  const roleOfUser=(trip:ITrip)=>{
-    const user = trip.members.find((m)=>m.email===session?.user?.email);
+  const roleOfUser = (trip: ITrip) => {
+    const user = trip.members.find((m) => m.email === session?.user?.email);
     const userRole = String(user?.role);
     setUserRole(userRole);
   }
@@ -152,8 +153,8 @@ export default function TripDetailsPage() {
 
   const handleDeleteExpense = async (expenseId: string) => {
     try {
-      const expense = expenses.find((exp)=>exp._id || exp.id === expenseId);
-      if(!expense){
+      const expense = expenses.find((exp) => exp._id || exp.id === expenseId);
+      if (!expense) {
         alert("Expense Already Removed!");
         return;
       }
@@ -163,36 +164,36 @@ export default function TripDetailsPage() {
       if (!res.ok) {
         console.log("Error in deleting expanse!", res);
       }
-      if(res.status===403){
+      if (res.status === 403) {
         alert('Access not allowed!');
         return;
       }
-      const deletedExpense: IDeletedExpense ={
+      const deletedExpense: IDeletedExpense = {
         ...expense,
-        remover:session?.user?.name ?? 'UnKnown User',
+        remover: session?.user?.name ?? 'UnKnown User',
       } as unknown as IDeletedExpense;
-      
+
       fetchExpanses();
-      setDeletedExpenses((prev)=>[...prev,deletedExpense]);
+      setDeletedExpenses((prev) => [...prev, deletedExpense]);
     } catch (e) {
       console.error("Something went wrong!", e);
     }
   }
 
-  useEffect(()=>{
-    const fetchDeletedExpense = async()=>{
-      try{
+  useEffect(() => {
+    const fetchDeletedExpense = async () => {
+      try {
         const res = await fetch(`/api/trips/${id}/deleted_expenses`);
         const data = await res.json();
-        if(res.ok){
+        if (res.ok) {
           setDeletedExpenses(data);
         }
-      }catch(e){
-        console.error("Error in fetching deleted expenses!",e);
+      } catch (e) {
+        console.error("Error in fetching deleted expenses!", e);
       }
     }
     fetchDeletedExpense();
-  },[session,id]);
+  }, [session, id]);
 
   const onClose = () => {
     setIsOpen(prev => !prev);
@@ -200,26 +201,26 @@ export default function TripDetailsPage() {
 
   //API CALLING FOR UPDATING ROLE CHANGE
 
-  const handleRoleChange = async (email:string, newRole:string)=>{
-    try{
-      const res = await fetch(`/api/trips`,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({email:email,role:newRole,tripId:id})
+  const handleRoleChange = async (email: string, newRole: string) => {
+    try {
+      const res = await fetch(`/api/trips`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, role: newRole, tripId: id })
       });
       const data = await res.json();
-      if(!res.ok){
+      if (!res.ok) {
         throw new Error(data.error || 'Failed tp update role');
       }
-      setTrip((prev)=>{
-        if(!prev) return prev;
-        return{
+      setTrip((prev) => {
+        if (!prev) return prev;
+        return {
           ...prev,
-          members:prev.members.map((m)=>m.email === email?{...m,role:newRole}:m)
-        }as ITrip
+          members: prev.members.map((m) => m.email === email ? { ...m, role: newRole } : m)
+        } as ITrip
       })
-    }catch(e){
-      console.log('Could not update role!',e);
+    } catch (e) {
+      console.log('Could not update role!', e);
     }
   }
 
@@ -249,247 +250,249 @@ export default function TripDetailsPage() {
         </div>
       </header>
 
-      {loading ? <div className='flex items-center h-screen text-bold text-teal-800 justify-center'>
-        Loading Info...
-      </div> : <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        {/* Main Header / Info Card */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 my-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
-            <Coins size={180} className="text-slate-900" />
-          </div>
-
-          <div className="relative z-10 space-y-3">
-            <span className="text-xs font-semibold tracking-wide text-emerald-700 uppercase bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-              Trip ID: {id}
-            </span>
-            <h1 className="text-3xl pt-1 pl-2 font-bold tracking-tight text-teal-900">
-              {trip?.name}
-            </h1>
-
-            <div className="flex flex-wrap gap-3 text-sm text-slate-600 pt-1">
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
-                <Calendar size={16} className="text-emerald-600" />
-                <span>{trip?.startDate ? format(new Date(trip?.startDate), 'dd MMM yyyy') : 'N/A'}</span>
-              </div>
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
-                <Coins size={16} className="text-amber-500" />
-                <span>Currency: <strong className="text-slate-900 font-semibold">{trip?.currency}</strong></span>
-              </div>
-            </div>
-          </div>
+      {loading ?
+        <div className="fixed inset-0 grid place-items-center backdrop-blur-xl">
+          <SajhedarLoader className="[--sj-scale:0.9]" />
         </div>
+        : <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        {/* Balance Cards Panel */}
-        <div className={`${expenses.length !== 0 ? "grid" : 'hidden'} grid-cols-1 md:grid-cols-3 gap-5 mb-20`}>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Group Spending</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {totalTripSpend}</p>
-          </div>
+          {/* Main Header / Info Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 my-10 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
+              <Coins size={180} className="text-slate-900" />
+            </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">My Spending</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {spendByUser}</p>
-          </div>
+            <div className="relative z-10 space-y-3">
+              <span className="text-xs font-semibold tracking-wide text-emerald-700 uppercase bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                Trip ID: {id}
+              </span>
+              <h1 className="text-3xl pt-1 pl-2 font-bold tracking-tight text-teal-900">
+                {trip?.name}
+              </h1>
 
-          <div className={`${userRemaningAmount > 0 ? 'bg-emerald-50/40 border-emerald-100' : 'bg-red-50/40 border-red-100'} border rounded-2xl p-6 shadow-sm flex flex-col justify-between`}>
-            <div>
-              <p className={`text-xs font-semibold ${userRemaningAmount > 0 ? 'text-emerald-700' : 'text-red-700'} tracking-wider uppercase`}>Your Net Balance</p>
-              <div className="flex items-center space-x-2 mt-1">
-                {userRemaningAmount > 0 ? <div className='flex items-center gap-2'>
-                  <span className="text-2xl font-bold text-emerald-600">{'+ '}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
-                  <TrendingUp size={18} className="text-emerald-500" />
-                </div> : <div className='flex items-center gap-2'><span className="text-2xl font-bold text-red-700">{''}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
-                  <TrendingDown size={18} className="text-red-500" /></div>}
+              <div className="flex flex-wrap gap-3 text-sm text-slate-600 pt-1">
+                <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
+                  <Calendar size={16} className="text-emerald-600" />
+                  <span>{trip?.startDate ? format(new Date(trip?.startDate), 'dd MMM yyyy') : 'N/A'}</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-slate-50 border border-slate-150 px-3 py-1.5 rounded-xl">
+                  <Coins size={16} className="text-amber-500" />
+                  <span>Currency: <strong className="text-slate-900 font-semibold">{trip?.currency}</strong></span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="justify-center items-center flex">
-          <button onClick={onClose}
-            className="flex cursor-pointer items-center space-x-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-3 my-5 mb-8 rounded-lg transition-all duration-200 shadow-sm active:scale-95 text-sm">
-            <Plus size={18} />
-            <span>Add Expense</span>
-          </button>
-        </div>
-        
+          {/* Balance Cards Panel */}
+          <div className={`${expenses.length !== 0 ? "grid" : 'hidden'} grid-cols-1 md:grid-cols-3 gap-5 mb-20`}>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Total Group Spending</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {totalTripSpend}</p>
+            </div>
 
-        {/* Members list */}
-        <div className="space-y-4">
-          <div className="flex justify-between pr-6 items-center">
-            <div className="flex items-center space-x-2 px-1">
-              <Users size={18} className="text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-900">Trip Members</h2>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">My Spending</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{trip?.currency} {spendByUser}</p>
+            </div>
+
+            <div className={`${userRemaningAmount > 0 ? 'bg-emerald-50/40 border-emerald-100' : 'bg-red-50/40 border-red-100'} border rounded-2xl p-6 shadow-sm flex flex-col justify-between`}>
+              <div>
+                <p className={`text-xs font-semibold ${userRemaningAmount > 0 ? 'text-emerald-700' : 'text-red-700'} tracking-wider uppercase`}>Your Net Balance</p>
+                <div className="flex items-center space-x-2 mt-1">
+                  {userRemaningAmount > 0 ? <div className='flex items-center gap-2'>
+                    <span className="text-2xl font-bold text-emerald-600">{'+ '}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
+                    <TrendingUp size={18} className="text-emerald-500" />
+                  </div> : <div className='flex items-center gap-2'><span className="text-2xl font-bold text-red-700">{''}{trip?.currency} {userRemaningAmount?.toFixed(0)}</span>
+                    <TrendingDown size={18} className="text-red-500" /></div>}
+                </div>
+              </div>
             </div>
           </div>
 
-          {membersRemainingAmount?.length !== 0 ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 divide-y divide-slate-100 shadow-sm">
-              {trip?.members.map((member, index) => {
-                // Look up balance for current member
-                const memberData = membersRemainingAmount.find(
-                  (m) => m.name.trim().toLowerCase() === member.name?.trim().toLowerCase()
-                );
-                const amount = memberData?.remainingAmount || 0;
-                const spend = memberData?.totalPaid;
-                const name = String(memberData?.name);
-                const isSelected = String(memberData?.name) === selected;
+          <div className="justify-center items-center flex">
+            <button onClick={onClose}
+              className="flex cursor-pointer items-center space-x-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-3 my-5 mb-8 rounded-lg transition-all duration-200 shadow-sm active:scale-95 text-sm">
+              <Plus size={18} />
+              <span>Add Expense</span>
+            </button>
+          </div>
 
-                return (
-                  <div key={index} onClick={()=>toggelButton(name)}>
-                    <div className="flex items-center justify-between my-3 first:pt-0 last:pb-0">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                        {member.name.substring(0, 2).toUpperCase()}
+
+          {/* Members list */}
+          <div className="space-y-4">
+            <div className="flex justify-between pr-6 items-center">
+              <div className="flex items-center space-x-2 px-1">
+                <Users size={18} className="text-emerald-600" />
+                <h2 className="text-lg font-bold text-slate-900">Trip Members</h2>
+              </div>
+            </div>
+
+            {membersRemainingAmount?.length !== 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 divide-y divide-slate-100 shadow-sm">
+                {trip?.members.map((member, index) => {
+                  // Look up balance for current member
+                  const memberData = membersRemainingAmount.find(
+                    (m) => m.name.trim().toLowerCase() === member.name?.trim().toLowerCase()
+                  );
+                  const amount = memberData?.remainingAmount || 0;
+                  const spend = memberData?.totalPaid;
+                  const name = String(memberData?.name);
+                  const isSelected = String(memberData?.name) === selected;
+
+                  return (
+                    <div key={index} onClick={() => toggelButton(name)}>
+                      <div className="flex items-center justify-between my-3 first:pt-0 last:pb-0">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                            {member.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <span className="text-sm font-medium text-slate-800">{member.name}</span>
+                          {session?.user?.name !== member.name ? <span className='text-sm text-slate-400'>( PAID : {spend} )</span> : null}
+                        </div>
+
+                        {/* Formatted Remaining Amount (+ / -) */}
+                        <div className="text-right font-semibold text-sm">
+                          {amount > 0 && (
+                            <span className="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                              + {trip?.currency || ''} {amount}
+                            </span>
+                          )}
+                          {amount < 0 && (
+                            <span className="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
+                              - {trip?.currency || ''} {Math.abs(amount)}
+                            </span>
+                          )}
+                          {amount === 0 && (
+                            <span className="text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+                              Settled
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="text-sm font-medium text-slate-800">{member.name}</span>
-                      {session?.user?.name !== member.name ? <span className='text-sm text-slate-400'>( PAID : {spend} )</span> : null}
+                      <div className={`${isSelected ? 'flex' : 'hidden'} items-center pl-12 text-slate-500 pb-1`}>role :
+                        {member.role !== 'creator' ? UserRole === 'creator' ?
+                          <select
+                            value={member.role?.toLowerCase()}
+                            onChange={(e) => handleRoleChange(String(member.email), e.target.value)}
+                            className="w-fit px-0.5 ml-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value='member'>Member</option>
+                            <option value='admin'>Admin</option>
+                          </select>
+                          : <span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span> : <span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span>}
+
+                      </div>
                     </div>
-
-                    {/* Formatted Remaining Amount (+ / -) */}
-                    <div className="text-right font-semibold text-sm">
-                      {amount > 0 && (
-                        <span className="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                          + {trip?.currency || ''} {amount}
-                        </span>
-                      )}
-                      {amount < 0 && (
-                        <span className="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
-                          - {trip?.currency || ''} {Math.abs(amount)}
-                        </span>
-                      )}
-                      {amount === 0 && (
-                        <span className="text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
-                          Settled
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className={`${isSelected?'flex':'hidden'} items-center pl-12 text-slate-500 pb-1`}>role : 
-                      {member.role !== 'creator'?UserRole==='creator'?
-                      <select 
-                      value={member.role?.toLowerCase()}
-                      onChange={(e) => handleRoleChange(String(member.email), e.target.value)}
-                      className="w-fit px-0.5 ml-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value='member'>Member</option>
-                        <option value='admin'>Admin</option>
-                      </select>
-                      :<span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span>:<span className='text-sm items-center pl-1 text-slate-400'>{member.role}</span>}
-                      
-                  </div>
-                  </div>
-                );
-              })}
-              <div className='mt-2 w-full'><p className='text-slate-400/80 items-center justify-center flex text-sm font-lightbold'>Only Admins are able to delete expenses.</p></div>
-            </div>
-          ) : (
-            <div className="flex items-center h-20 bg-teal-100/50 rounded-2xl m-6 text-bold text-teal-800 justify-center">
-              Loading Info...
-            </div>
-          )}
-        </div>
-
-
-
-        {/*Expenses List */}
-        <div className="lg:col-span-2 mt-18 space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2">
-              <Receipt size={18} className="text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-900">Expense History</h2>
-            </div>
-            <span className="text-xs text-slate-400 font-medium">{expenses.length} activities</span>
-          </div>
-          <div className="space-y-3">
-            {expenses?.map((expense) => {
-              const expenseId = String(expense._id);
-              const isSelected = selected === expenseId;
-              return(
-              <div
-                onClick={() => toggelButton(expenseId)}
-                key={expenseId}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-50 transition-colors">
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
-                      {expense.description}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Paid by <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-sm font-bold text-slate-950">
-                    {trip?.currency} {expense.amount}
-                  </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Share: {trip?.currency} {(expense.amount / (trip?.members?.length || 1)).toFixed(0)} / person
-                  </p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevents parent card click from toggling state
-                      handleDeleteExpense(String(expense._id));
-                    }}
-                    className={`${isSelected ? 'flex' : 'hidden'} items-center text-slate-400 text-sm ml-5 mt-1 bg-red-50 p-1 px-2 rounded-2xl place-self-end hover:bg-red-200 hover:text-red-500`}>
-                    Delete
-                  </button>
-                </div>
-              </div>)
-})}
-          </div>
-        </div>
-        <div className={`${expenses.length === 0 ? 'flex' : 'hidden'} rounded-2xl mx-5 mt-10 bg-teal-50 items-center justify-center p-4`}>
-          <p className='text-teal-800 '>Silence in the vault. Did someone buy coffee yet?</p>
-        </div>
-
-        {/*Deleted Expenses*/}
-
-        <div className={`${deletedExpenses.length === 0?'hidden':'block'} lg:col-span-2 mt-18 space-y-4`}>
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2">
-              <Trash2 size={18} className="text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-900">Deleted Expenses</h2>
-            </div>
-            <span className="text-xs text-slate-400 font-medium">{deletedExpenses.length} activities</span>
-          </div>
-          <div className="space-y-3">
-            {deletedExpenses?.map((expense) => (
-              <div
-                key={expense.id}
-                className="bg-red-50/50 border border-red-200 hover:border-red-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-red-50 border border-red-150 rounded-xl flex items-center justify-center text-red-300 group-hover:text-red-600 group-hover:bg-red-50 transition-colors">
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
-                      {expense.description}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Removed By <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-sm font-bold text-slate-950">
-                    {trip?.currency} {expense.amount}
-                  </span>
-                </div>
+                  );
+                })}
+                <div className='mt-2 w-full'><p className='text-slate-400/80 items-center justify-center flex text-sm font-lightbold'>Only Admins are able to delete expenses.</p></div>
               </div>
-            ))}
+            ) : (
+              <div className="flex items-center h-20 bg-teal-100/50 rounded-2xl m-6 text-bold text-teal-800 justify-center">
+                Loading Info...
+              </div>
+            )}
           </div>
-        </div>
 
-      </main>}
+
+
+          {/*Expenses List */}
+          <div className="lg:col-span-2 mt-18 space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center space-x-2">
+                <Receipt size={18} className="text-emerald-600" />
+                <h2 className="text-lg font-bold text-slate-900">Expense History</h2>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">{expenses.length} activities</span>
+            </div>
+            <div className="space-y-3">
+              {expenses?.map((expense) => {
+                const expenseId = String(expense._id);
+                const isSelected = selected === expenseId;
+                return (
+                  <div
+                    onClick={() => toggelButton(expenseId)}
+                    key={expenseId}
+                    className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-50 transition-colors">
+                        <Clock size={16} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                          {expense.description}
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Paid by <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-slate-950">
+                        {trip?.currency} {expense.amount}
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Share: {trip?.currency} {(expense.amount / (trip?.members?.length || 1)).toFixed(0)} / person
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents parent card click from toggling state
+                          handleDeleteExpense(String(expense._id));
+                        }}
+                        className={`${isSelected ? 'flex' : 'hidden'} items-center text-slate-400 text-sm ml-5 mt-1 bg-red-50 p-1 px-2 rounded-2xl place-self-end hover:bg-red-200 hover:text-red-500`}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>)
+              })}
+            </div>
+          </div>
+          <div className={`${expenses.length === 0 ? 'flex' : 'hidden'} rounded-2xl mx-5 mt-10 bg-teal-50 items-center justify-center p-4`}>
+            <p className='text-teal-800 '>Silence in the vault. Did someone buy coffee yet?</p>
+          </div>
+
+          {/*Deleted Expenses*/}
+
+          <div className={`${deletedExpenses.length === 0 ? 'hidden' : 'block'} lg:col-span-2 mt-18 space-y-4`}>
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center space-x-2">
+                <Trash2 size={18} className="text-emerald-600" />
+                <h2 className="text-lg font-bold text-slate-900">Deleted Expenses</h2>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">{deletedExpenses.length} activities</span>
+            </div>
+            <div className="space-y-3">
+              {deletedExpenses?.map((expense) => (
+                <div
+                  key={expense.id}
+                  className="bg-red-50/50 border border-red-200 hover:border-red-300 rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm group cursor-pointer"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-red-50 border border-red-150 rounded-xl flex items-center justify-center text-red-300 group-hover:text-red-600 group-hover:bg-red-50 transition-colors">
+                      <Clock size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                        {expense.description}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Removed By <span className="text-slate-700 font-medium">{expense.payer}</span> • {expense?.date ? format(new Date(expense.date), 'dd MMM yyyy') : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-slate-950">
+                      {trip?.currency} {expense.amount}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </main>}
     </div>
   );
 }
