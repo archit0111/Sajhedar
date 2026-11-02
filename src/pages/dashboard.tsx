@@ -138,7 +138,7 @@ export default function Dashboard() {
               <SajhedarLoader className = "[--sj-scale:0.6]" />
             </div>)
             : <div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
-              No active journeys. Let's change that.
+              No active journeys. Lets change that.
             </div>)
           : (
             <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
