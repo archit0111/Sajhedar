@@ -8,7 +8,7 @@ import CreateTripModal from '@/components/CreateTripModal';
 import { useSession } from 'next-auth/react';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
-import {CreateTripForm} from '@/components/CreateTripModal';
+import { CreateTripForm } from '@/components/CreateTripModal';
 import SajhedarLoader from '@/components/SajhedarLoader';
 
 interface Member {
@@ -36,7 +36,7 @@ export default function Dashboard() {
   const [trips, setTrips] = useState<ClientTrip[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
-  const [loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -56,10 +56,10 @@ export default function Dashboard() {
         }
         const data = await res.json();
         setTrips(data);
-        
+
       } catch (e) {
         console.log(e);
-      }finally{
+      } finally {
         setLoading(false);
       }
     }
@@ -71,7 +71,9 @@ export default function Dashboard() {
 
   if (status === 'loading') {
     return (
-      <SajhedarLoader/>
+      <div className="fixed inset-0 grid place-items-center backdrop-blur-xl">
+        <SajhedarLoader className = "[--sj-scale:0.9]" />
+      </div>
     )
   }
 
@@ -86,7 +88,7 @@ export default function Dashboard() {
     setIsOpen(false);
   }
 
-  const onSubmit = async (data:CreateTripForm) => {
+  const onSubmit = async (data: CreateTripForm) => {
 
     try {
       const res = await fetch('/api/trips', {
@@ -98,7 +100,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(resData.error || 'Failed to create trip');
       console.log("Trip created successfully!");
       const newTrip = resData.trip || resData;
-      setTrips((prevTrips) => [...prevTrips,newTrip]);
+      setTrips((prevTrips) => [...prevTrips, newTrip]);
     } catch (e) {
       console.error('Error in creating trip:', e);
     }
@@ -127,23 +129,24 @@ export default function Dashboard() {
         </div>
         <div className="mt-20">
           <h3
-          id='trips' 
-          className='pl-2 font-bold text-2xl'>Your Trips</h3>
+            id='trips'
+            className='pl-2 font-bold text-2xl'>Your Trips</h3>
         </div>
         {trips.length === 0 ?
-          (loading?(<div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
-            Loading trips...
-          </div>)
-          :<div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
-            No trips present...
-          </div>)
-        : (
-          <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
-            {trips.toReversed().map((trip: ClientTrip) => (
-              <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
-            ))}
-          </div>
-        )}
+          (loading ? (
+            <div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
+              <SajhedarLoader className = "[--sj-scale:0.6]" />
+            </div>)
+            : <div className="h-40 m-2 mb-80 flex items-center justify-center bg-teal-50 mt-10 rounded-2xl font-medium text-teal-800">
+              No active journeys. Let's change that.
+            </div>)
+          : (
+            <div className="grid mb-80 grid-cols-1 md:grid-cols-2 place-content-center gap-6 m-2 mt-10">
+              {trips.toReversed().map((trip: ClientTrip) => (
+                <TripCard key={String(trip._id)} trip={trip as unknown as React.ComponentProps<typeof TripCard>["trip"]}/>
+              ))}
+            </div>
+          )}
 
       </div>
       <Footer />
