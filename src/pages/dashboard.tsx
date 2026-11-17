@@ -36,7 +36,7 @@ export default function Dashboard() {
   const [trips, setTrips] = useState<ClientTrip[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -47,7 +47,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUserTrips = async () => {
       if (!session) return;
-      setLoading(true);
       try {
         const res = await fetch(`/api/trips?t=${Date.now()}`);
 

@@ -14,6 +14,7 @@ import {
   Clock,
   TrendingDown,
   Trash2,
+  BarChart,
 } from 'lucide-react';
 import { ITrip } from '@/models/Trip';
 import AddExpanseModal from '@/components/AddExpanseModal';
@@ -31,7 +32,7 @@ interface IMembersWithRemainingAmount {
 
 export default function TripDetailsPage() {
   const { data: session } = useSession();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [trip, setTrip] = useState<ITrip>();
   const router = useRouter();
   const { id } = router.query;
@@ -53,7 +54,6 @@ export default function TripDetailsPage() {
     const fetchTrip = async () => {
       if (!session || !id) return;
       try {
-        setLoading(true);
         const res = await fetch(`/api/trips/${id}`);
         const trip = await res.json();
         if (!res.ok) {
@@ -227,7 +227,7 @@ export default function TripDetailsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-bl from-emerald-50/60 via-slate-50 to-amber-50/50 text-slate-800 font-sans antialiased">
       <AddExpanseModal id={id ? String(id) : null} isOpen={isOpen} onClose={onClose} onExpenseAdded={fetchExpanses} />
-      {/* <EditMembersModal isOpen={isOpen}  onClose={onClose} trip={trip}/> */}
+
       {/* Top Navigation Bar */}
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -237,10 +237,12 @@ export default function TripDetailsPage() {
           </Link>
 
           <div className="flex items-center space-x-3">
-            {/* <button className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-xl transition-all text-sm border border-slate-200">
-              <UserPlus size={16} />
-              <span>Invite</span>
-            </button> */}
+            <button 
+            onClick={()=>router.push(`/trip/${id}/analytics`)}
+            className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-xl transition-all text-sm border border-slate-200">
+              <BarChart/>
+              <span>Analytics</span>
+            </button>
             <button onClick={onClose}
               className="flex cursor-pointer items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 shadow-sm active:scale-95 text-sm">
               <Plus size={16} />
