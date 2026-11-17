@@ -120,7 +120,7 @@ export default function TripAnalytics() {
             <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 mb-10">
                 <div className="mx-auto flex items-center justify-between">
                     <div onClick={() => router.back()}
-                        className="flex items-center space-x-2 text-slate-500 hover:text-slate-900 transition-colors group text-sm font-medium">
+                        className="flex items-center space-x-2 text-slate-500 hover:text-slate-900 transition-colors group text-sm font-medium cursor-pointer">
                         <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" />
                         <span>Back to Dashboard</span>
                     </div>
@@ -129,7 +129,6 @@ export default function TripAnalytics() {
 
             <h1 className="text-2xl font-bold text-slate-900 mb-6">Trip Expense Analytics</h1>
 
-            {/* Top Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <p className="text-sm text-slate-500 font-medium">Total Expenditure</p>
